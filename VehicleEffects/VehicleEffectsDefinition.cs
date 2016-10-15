@@ -50,6 +50,7 @@ namespace VehicleEffects
             [XmlAttribute("base"), DefaultValue(null)]
             public string Base { get; set; }
 
+            // VehicleEffectWrapper params
             public Vector Position { get; set; }
             public Vector Direction { get; set; }
 
@@ -57,11 +58,29 @@ namespace VehicleEffects
 
             public int MaxSpeed { get; set; }
 
+            //MultiEffect params
+            public List<SubEffect> SubEffects { get; set; }
+            public float Duration;
+
             public Effect()
             {
                 // Set some default values
                 MinSpeed = 0;
                 MaxSpeed = 10000;
+            }
+        }
+
+        public class SubEffect
+        {
+            public Effect Effect { get; set; }
+
+            public float StartTime { get; set; }
+            public float EndTime { get; set; }
+            public float Probability { get; set; }
+
+            public SubEffect()
+            {
+                Probability = 1.0f;
             }
         }
 
