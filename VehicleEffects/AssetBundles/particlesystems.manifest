@@ -1,0 +1,22 @@
+ManifestFileVersion: 0
+CRC: 3693769996
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 5b352124faaa07435832a00b1f9de181
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 19065ba4f87ee15c738735156ff7779b
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+Assets:
+- Assets/ParticleSystemSteam.prefab
+Dependencies: []
