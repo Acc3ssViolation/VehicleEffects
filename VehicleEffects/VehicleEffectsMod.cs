@@ -259,8 +259,8 @@ namespace VehicleEffects
             desiredEffectVariant.m_name = effectName;
             desiredEffectVariant.m_position = effectDef.Position?.ToUnityVector() ?? Vector3.zero;
             desiredEffectVariant.m_direction = effectDef.Direction?.ToUnityVector() ?? Vector3.zero;
-            desiredEffectVariant.m_maxSpeed = effectDef.MaxSpeed * 3.75f;
-            desiredEffectVariant.m_minSpeed = effectDef.MinSpeed * 3.75f;
+            desiredEffectVariant.m_maxSpeed = (effectDef.MaxSpeed / 0.96f);     // First from km/h to m/s, then multiply by 3.75 since velocity passed to effects is multiplied as well
+            desiredEffectVariant.m_minSpeed = (effectDef.MinSpeed / 0.96f);
 
 
             var effectPrefab = FindEffect(effectName);
