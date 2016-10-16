@@ -53,5 +53,14 @@ namespace VehicleEffects.GameExtensions
             }
         }
 
+        public override void PlayEffect(InstanceID id, SpawnArea area, Vector3 velocity, float acceleration, float magnitude, AudioManager.ListenerInfo listenerInfo, AudioGroup audioGroup)
+        {
+            if(velocity.magnitude >= m_params.m_minSpeed && velocity.magnitude <= m_params.m_maxSpeed)
+            {
+                area.m_matrix = area.m_matrix * Matrix4x4.TRS(m_params.m_position, Quaternion.LookRotation(m_params.m_direction), Vector3.one);
+                m_wrappedEffect.PlayEffect(id, area, velocity, acceleration, magnitude, listenerInfo, audioGroup);
+            }
+        }
+
     }
 }

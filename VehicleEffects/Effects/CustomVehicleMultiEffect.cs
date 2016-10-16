@@ -10,9 +10,8 @@ namespace VehicleEffects.Effects
     public class CustomVehicleMultiEffect
     {
         public static GameObject gameObject { get; private set; }
-        private const string effectName = "Vehicle Multi Effect Wrapper";
-        private static Dictionary<String, EffectInfo> modifiedEffects;
-
+        private const string effectName = "Custom Multi Effects";
+        private static List<CustomMultiEffect> createdEffects;
 
         public static GameObject CreateEffectObject(Transform parent)
         {
@@ -21,8 +20,8 @@ namespace VehicleEffects.Effects
                 Debug.LogWarning("Creating effect object for " + effectName + " but object already exists!");
             }
 
-            modifiedEffects = new Dictionary<string, EffectInfo>();
-            gameObject = new GameObject(effectName + " Effects");
+            createdEffects = new List<CustomMultiEffect>();
+            gameObject = new GameObject(effectName);
             gameObject.transform.parent = parent;
             return gameObject;
         }
@@ -36,26 +35,41 @@ namespace VehicleEffects.Effects
                 return null;
             }
 
-            var effect = gameObject.AddComponent<CustomMultiEffect>();
+            CustomMultiEffect effect = null;
 
-            effect.m_params = parameters;
-            effect.m_duration = duration;
-            effect.m_useSimulationTime = true;
-            effect.m_effects = subEffects;
+            Debug.Log("Creating MultiEffect for request...");
+
+            var i = 0;
+            while(effect == null && i < createdEffects.Count)
+            {
+                if(createdEffects[i].m_params.Equals(parameters))
+                {
+                    if(createdEffects[i].m_duration == duration)
+                    {
+                        if(createdEffects[i].m_effects.SequenceEqual(subEffects))
+                        {
+                            effect = createdEffects[i];
+                            Debug.Log("Found existing MultiEffect that matches request!");
+                        }
+                    }
+                }
+                i++;
+            }
+
+            if(effect == null)
+            {
+                Debug.Log("Could not find existing MultiEffect that matches request, creating a new one!");
+                effect = gameObject.AddComponent<CustomMultiEffect>();
+
+                effect.m_params = parameters;
+                effect.m_duration = duration;
+                effect.m_useSimulationTime = true;
+                effect.m_effects = subEffects;
+
+                createdEffects.Add(effect);
+            }
 
             return effect;
-        }
-
-        public static void OnLevelUnloading()
-        {
-            modifiedEffects.Clear();
-        }
-
-        private static EffectInfo GetModifiedEffect(string effectName)
-        {
-            EffectInfo result;
-            modifiedEffects.TryGetValue(effectName, out result);
-            return result;
         }
     }
 }

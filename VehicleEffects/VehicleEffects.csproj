@@ -59,8 +59,8 @@
   <ItemGroup>
     <Compile Include="Effects\CustomVehicleMultiEffect.cs" />
     <Compile Include="Effects\CustomVehicleEffect.cs" />
-    <Compile Include="Effects\TrainDitchLights.cs" />
     <Compile Include="Effects\DieselTrainMovement.cs" />
+    <Compile Include="Effects\TrainDitchLight.cs" />
     <Compile Include="Effects\VehicleSteam.cs" />
     <Compile Include="GameExtensions\CustomMultiEffect.cs" />
     <Compile Include="GameExtensions\VehicleEffectWrapper.cs" />
