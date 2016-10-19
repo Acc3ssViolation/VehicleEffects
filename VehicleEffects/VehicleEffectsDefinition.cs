@@ -64,12 +64,14 @@ namespace VehicleEffects
             //MultiEffect params
             public List<SubEffect> SubEffects { get; set; }
             public float Duration;
+            public bool UseSimulationTime;
 
             public Effect()
             {
                 // Set some default values
                 MinSpeed = 0;
                 MaxSpeed = 10000;
+                UseSimulationTime = true;
 
                 ForbiddenFlags = 0;
                 RequiredFlags = Flags.Created;
@@ -119,8 +121,11 @@ namespace VehicleEffects
         {
             public Effect Effect { get; set; }
 
+            //[XmlAttribute("startTime")]
             public float StartTime { get; set; }
+            //[XmlAttribute("endTime")]
             public float EndTime { get; set; }
+            //[XmlAttribute("probability")]
             public float Probability { get; set; }
 
             public SubEffect()

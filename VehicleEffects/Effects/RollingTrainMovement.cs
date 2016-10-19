@@ -1,16 +1,14 @@
-﻿using ColossalFramework.Plugins;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using UnityEngine;
 
 namespace VehicleEffects.Effects
 {
-    public class SteamTrainMovement
+    public class RollingTrainMovement
     {
-        private const string effectName = "Steam Train Movement";
+        private const string effectName = "Rolling Train Movement";
 
         public static EffectInfo CreateEffectObject(Transform parent)
         {
@@ -21,18 +19,20 @@ namespace VehicleEffects.Effects
                 GameObject obj = new GameObject(effectName);
                 obj.transform.parent = parent;
 
-                EngineSoundEffect steamEngineSound = Util.CopyEngineSoundEffect(defaultEngineSound, obj.AddComponent<EngineSoundEffect>());
-                steamEngineSound.name = effectName;
+                EngineSoundEffect newSoundEffect = Util.CopyEngineSoundEffect(defaultEngineSound, obj.AddComponent<EngineSoundEffect>());
+                newSoundEffect.name = effectName;
+
+
 
                 // Create a copy of audioInfo
                 AudioInfo audioInfo = UnityEngine.Object.Instantiate(defaultEngineSound.m_audioInfo) as AudioInfo;
 
                 audioInfo.name = effectName;
-                audioInfo.m_volume = 0.7f;
+                audioInfo.m_volume = 0.8f;
 
                 // Load new audio clip
 
-                var clip = Util.LoadAudioClipFromModDir("Sounds/steam-engine-a3-moving.ogg");
+                var clip = Util.LoadAudioClipFromModDir("Sounds/rolling-stock-moving.ogg");
 
                 if(clip != null)
                 {
@@ -43,9 +43,13 @@ namespace VehicleEffects.Effects
                     return null;
                 }
 
-                steamEngineSound.m_audioInfo = audioInfo;
+                newSoundEffect.m_audioInfo = audioInfo;
 
-                return steamEngineSound;
+
+                //defaultEngineSound.m_audioInfo = audioInfo;
+
+
+                return newSoundEffect;
             }
             else
             {

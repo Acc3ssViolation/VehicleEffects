@@ -103,10 +103,15 @@ namespace VehicleEffects
 
             // Custom particles
             VehicleSteam.CreateEffectObject(gameObject.transform);
+            DieselSmoke.CreateEffectObject(gameObject.transform);
 
             // Custom sounds
             SteamTrainMovement.CreateEffectObject(gameObject.transform);
             DieselTrainMovement.CreateEffectObject(gameObject.transform);
+            RollingTrainMovement.CreateEffectObject(gameObject.transform);
+            TrainHorn.CreateEffectObject(gameObject.transform);
+            TrainWhistle.CreateEffectObject(gameObject.transform);
+            TrainBell.CreateEffectObject(gameObject.transform);
 
             // Custom lights
             TrainDitchLight.CreateEffectObject(gameObject.transform);
@@ -259,8 +264,8 @@ namespace VehicleEffects
             desiredEffectVariant.m_name = effectName;
             desiredEffectVariant.m_position = effectDef.Position?.ToUnityVector() ?? Vector3.zero;
             desiredEffectVariant.m_direction = effectDef.Direction?.ToUnityVector() ?? Vector3.zero;
-            desiredEffectVariant.m_maxSpeed = (effectDef.MaxSpeed / 0.96f);     // First from km/h to m/s, then multiply by 3.75 since velocity passed to effects is multiplied as well
-            desiredEffectVariant.m_minSpeed = (effectDef.MinSpeed / 0.96f);
+            desiredEffectVariant.m_maxSpeed = Util.SpeedKmHToEffect(effectDef.MaxSpeed);
+            desiredEffectVariant.m_minSpeed = Util.SpeedKmHToEffect(effectDef.MinSpeed);
 
 
             var effectPrefab = FindEffect(effectName);
@@ -317,7 +322,7 @@ namespace VehicleEffects
                                 });
                             }
                         }
-                        effectPrefab = CustomVehicleMultiEffect.CreateEffect(desiredEffectVariant, loadedSubEffects.ToArray(), effectDef.Duration);
+                        effectPrefab = CustomVehicleMultiEffect.CreateEffect(desiredEffectVariant, loadedSubEffects.ToArray(), effectDef.Duration, effectDef.UseSimulationTime);
                     }
                     else
                     {
@@ -349,7 +354,7 @@ namespace VehicleEffects
                 m_parkedFlagsForbidden = VehicleParked.Flags.Created,
                 m_parkedFlagsRequired = VehicleParked.Flags.None,
                 m_vehicleFlagsForbidden = (Vehicle.Flags)effectDef.ForbiddenFlags,
-                m_vehicleFlagsRequired = ((Vehicle.Flags)effectDef.RequiredFlags) & Vehicle.Flags.Created
+                m_vehicleFlagsRequired = (Vehicle.Flags)effectDef.RequiredFlags
             };
 
             if(effectDef.Replacment == null)

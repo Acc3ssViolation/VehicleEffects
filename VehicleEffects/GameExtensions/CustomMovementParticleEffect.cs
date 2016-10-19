@@ -14,6 +14,8 @@ namespace VehicleEffects.GameExtensions
         /// </summary>
         public float m_spawnAreaRadius = 0.25f;
 
+        public ParticleSystem m_particleSystemOverride;
+
 
         public override void RenderEffect(InstanceID id, EffectInfo.SpawnArea area, Vector3 velocity, float acceleration, float magnitude, float timeDelta, RenderManager.CameraInfo cameraInfo)
         {
@@ -37,6 +39,9 @@ namespace VehicleEffects.GameExtensions
 
         public new void EmitParticles(InstanceID id, Matrix4x4 matrix, Vector4[] positions, Vector3 velocity, float particlesPerSquare, int probability, ref Vector3 min, ref Vector3 max)
         {
+            if(m_particleSystemOverride != null && m_particleSystemOverride != m_particleSystem)
+                m_particleSystem = m_particleSystemOverride;
+
             Randomizer randomizer = new Randomizer(id.RawData);
             particlesPerSquare *= this.m_particleSystem.emissionRate;
             int num = positions.Length;

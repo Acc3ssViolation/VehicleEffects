@@ -1,11 +1,47 @@
 ﻿using System;
 using UnityEngine;
 using System.IO;
+using System.Reflection;
 
 namespace VehicleEffects
 {
     public class Util
     {
+        public static float SpeedKmHToInternal(float kmh)
+        {
+            return kmh * 0.16f;
+        }
+
+        public static float SpeedInternalToKmH(float intern)
+        {
+            return intern / 0.16f;
+        }
+
+        public static float SpeedKmHToEffect(float kmh)
+        {
+            return kmh * 0.6f;
+        }
+
+        public static AudioClip LoadAudioClipFromModDir(string filename)
+        {
+            Assembly asm = Assembly.GetAssembly(typeof(VehicleEffectsMod));
+            var pluginInfo = ColossalFramework.Plugins.PluginManager.instance.FindPluginInfo(asm);
+
+            Debug.Log(pluginInfo.modPath);
+
+            try
+            {
+                string absUri = "file:///" + pluginInfo.modPath.Replace("\\", "/") + "/" + filename;
+                WWW www = new WWW(absUri);
+                return www.GetAudioClip(true, false);
+            }
+            catch(Exception e)
+            {
+                Debug.Log("Exception trying to load audio file '" + filename + "'!" + e.ToString());
+                return null;
+            }
+        }
+
         public static EngineSoundEffect CopyEngineSoundEffect(EngineSoundEffect template, EngineSoundEffect target)
         {
             target.m_minPitch = template.m_minPitch;

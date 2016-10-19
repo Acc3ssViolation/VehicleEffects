@@ -27,7 +27,7 @@ namespace VehicleEffects.Effects
         }
 
 
-        public static EffectInfo CreateEffect(VehicleEffectWrapper.VehicleEffectParams parameters, MultiEffect.SubEffect[] subEffects, float duration)
+        public static EffectInfo CreateEffect(VehicleEffectWrapper.VehicleEffectParams parameters, MultiEffect.SubEffect[] subEffects, float duration, bool useSimulationTime)
         {
             if(gameObject == null)
             {
@@ -44,7 +44,7 @@ namespace VehicleEffects.Effects
             {
                 if(createdEffects[i].m_params.Equals(parameters))
                 {
-                    if(createdEffects[i].m_duration == duration)
+                    if(createdEffects[i].m_duration == duration && createdEffects[i].m_useSimulationTime == useSimulationTime)
                     {
                         if(createdEffects[i].m_effects.SequenceEqual(subEffects))
                         {
@@ -63,7 +63,7 @@ namespace VehicleEffects.Effects
 
                 effect.m_params = parameters;
                 effect.m_duration = duration;
-                effect.m_useSimulationTime = true;
+                effect.m_useSimulationTime = useSimulationTime;
                 effect.m_effects = subEffects;
 
                 createdEffects.Add(effect);

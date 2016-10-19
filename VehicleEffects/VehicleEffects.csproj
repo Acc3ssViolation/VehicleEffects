@@ -59,8 +59,13 @@
   <ItemGroup>
     <Compile Include="Effects\CustomVehicleMultiEffect.cs" />
     <Compile Include="Effects\CustomVehicleEffect.cs" />
+    <Compile Include="Effects\DieselSmoke.cs" />
     <Compile Include="Effects\DieselTrainMovement.cs" />
+    <Compile Include="Effects\TrainBell.cs" />
     <Compile Include="Effects\TrainDitchLight.cs" />
+    <Compile Include="Effects\TrainHorn.cs" />
+    <Compile Include="Effects\RollingTrainMovement.cs" />
+    <Compile Include="Effects\TrainWhistle.cs" />
     <Compile Include="Effects\VehicleSteam.cs" />
     <Compile Include="GameExtensions\CustomMultiEffect.cs" />
     <Compile Include="GameExtensions\VehicleEffectWrapper.cs" />
@@ -73,11 +78,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetPath)" "C:\Users\Brookhuis\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\$(TargetFileName)"* /Y /R
+    <PostBuildEvent>xcopy "$(TargetPath)" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\$(TargetFileName)"* /Y /R
 
-xcopy "$(SolutionDir)\Sounds" "C:\Users\Brookhuis\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\Sounds" /I /Y /R
+xcopy "$(SolutionDir)\Sounds" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\Sounds" /I /Y /R
 
-xcopy "$(SolutionDir)\AssetBundles" "C:\Users\Brookhuis\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\AssetBundles" /I /Y /R</PostBuildEvent>
+xcopy "$(SolutionDir)\AssetBundles" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\AssetBundles" /I /Y /R</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

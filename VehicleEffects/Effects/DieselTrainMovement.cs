@@ -31,21 +31,14 @@ namespace VehicleEffects.Effects
 
                 // Load new audio clip
 
-                Assembly asm = Assembly.GetAssembly(typeof(VehicleEffectsMod));
-                var pluginInfo = PluginManager.instance.FindPluginInfo(asm);
+                var clip = Util.LoadAudioClipFromModDir("Sounds/diesel-engine-sd45-moving.ogg");
 
-                Debug.Log(pluginInfo.modPath);
-
-                try
+                if(clip != null)
                 {
-                    string absUri = "file:///" + pluginInfo.modPath.Replace("\\", "/") + "/Sounds/diesel-engine-sd45-moving.ogg";
-                    Debug.Log(absUri);
-                    WWW www = new WWW(absUri);
-                    audioInfo.m_clip = www.GetAudioClip(true, false);
+                    audioInfo.m_clip = clip;
                 }
-                catch(Exception e)
+                else
                 {
-                    Debug.Log("Exception trying to load audio file!" + e.ToString());
                     return null;
                 }
 
