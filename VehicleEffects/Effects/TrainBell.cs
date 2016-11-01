@@ -23,7 +23,7 @@ namespace VehicleEffects.Effects
             audioInfo.name = effectName;
             audioInfo.m_loop = true;
             audioInfo.m_pitch = 1.0f;
-            audioInfo.m_volume = 0.5f;
+            audioInfo.m_volume = 0.8f;
             audioInfo.m_randomTime = false;
 
             // Load new audio clip

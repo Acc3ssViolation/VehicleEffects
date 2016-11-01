@@ -1,37 +1,37 @@
-﻿using ColossalFramework.Plugins;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using UnityEngine;
 
 namespace VehicleEffects.Effects
 {
-    public class DieselTrainMovement
+    public class PropAircraftSound
     {
-        private const string effectName = "Diesel Train Movement";
+        private const string effectName = "Propeller Aircraft Sound";
 
         public static EffectInfo CreateEffectObject(Transform parent)
         {
-            EngineSoundEffect defaultEngineSound = VehicleEffectsMod.FindEffect("Train Movement") as EngineSoundEffect;
+            EngineSoundEffect defaultEngineSound = VehicleEffectsMod.FindEffect("Aircraft Sound") as EngineSoundEffect;
 
             if(defaultEngineSound != null)
             {
                 GameObject obj = new GameObject(effectName);
                 obj.transform.parent = parent;
 
-                EngineSoundEffect dieselEngineSound = Util.CopyEngineSoundEffect(defaultEngineSound, obj.AddComponent<EngineSoundEffect>());
-                dieselEngineSound.name = effectName;
+                EngineSoundEffect newEngineSoundEffect = Util.CopyEngineSoundEffect(defaultEngineSound, obj.AddComponent<EngineSoundEffect>());
+                newEngineSoundEffect.name = effectName;
+                newEngineSoundEffect.m_minPitch = 0.65f;
 
                 // Create a copy of audioInfo
                 AudioInfo audioInfo = UnityEngine.Object.Instantiate(defaultEngineSound.m_audioInfo) as AudioInfo;
 
                 audioInfo.name = effectName;
+                audioInfo.m_volume = 0.65f;
 
                 // Load new audio clip
 
-                var clip = Util.LoadAudioClipFromModDir("Sounds/diesel-engine-sd45-moving.ogg");
+                var clip = Util.LoadAudioClipFromModDir("Sounds/prop-plane-moving.ogg");
 
                 if(clip != null)
                 {
@@ -42,13 +42,13 @@ namespace VehicleEffects.Effects
                     return null;
                 }
 
-                dieselEngineSound.m_audioInfo = audioInfo;
+                newEngineSoundEffect.m_audioInfo = audioInfo;
 
-                return dieselEngineSound;
+                return newEngineSoundEffect;
             }
             else
             {
-                Debug.LogError("Could not find default train sound effect!");
+                Debug.LogError("Could not find default plane sound effect!");
                 return null;
             }
         }

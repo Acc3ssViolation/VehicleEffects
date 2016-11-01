@@ -57,10 +57,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Effects\BlinkerLights.cs" />
     <Compile Include="Effects\CustomVehicleMultiEffect.cs" />
     <Compile Include="Effects\CustomVehicleEffect.cs" />
     <Compile Include="Effects\DieselSmoke.cs" />
     <Compile Include="Effects\DieselTrainMovement.cs" />
+    <Compile Include="Effects\PropAircraftMovement.cs" />
+    <Compile Include="Effects\PropAircraftSound.cs" />
     <Compile Include="Effects\TrainBell.cs" />
     <Compile Include="Effects\TrainDitchLight.cs" />
     <Compile Include="Effects\TrainHorn.cs" />
@@ -68,9 +71,11 @@
     <Compile Include="Effects\TrainWhistle.cs" />
     <Compile Include="Effects\VehicleSteam.cs" />
     <Compile Include="GameExtensions\CustomMultiEffect.cs" />
+    <Compile Include="GameExtensions\IntensityLightEffect.cs" />
     <Compile Include="GameExtensions\VehicleEffectWrapper.cs" />
     <Compile Include="GameExtensions\CustomMovementParticleEffect.cs" />
     <Compile Include="Effects\SteamTrainMovement.cs" />
+    <Compile Include="SoundEffectOptions.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="VehicleEffectsDefinition.cs" />
     <Compile Include="VehicleEffectsMod.cs" />

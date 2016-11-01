@@ -31,7 +31,7 @@ namespace VehicleEffects.Effects
         }
 
 
-        public static EffectInfo CreateEffect(EffectInfo effect, VehicleEffectWrapper.VehicleEffectParams desiredParams)
+        public static EffectInfo CreateEffect(VehicleEffectsDefinition.Effect effectDef, EffectInfo baseEffect)
         {
             if(gameObject == null)
             {
@@ -39,19 +39,24 @@ namespace VehicleEffects.Effects
                 return null;
             }
 
-            Debug.Log("Creating Vehicle Effect Wrapper for request...");
             VehicleEffectWrapper effectWrapper = null;
 
-            createdEffects.TryGetValue(desiredParams, out effectWrapper);
+            var effectParameters = new VehicleEffectWrapper.VehicleEffectParams();
+            effectParameters.m_name = ((effectDef.Replacment == null) ? effectDef.Name : effectDef.Replacment) + ((effectDef.Base != null) ? " - " + effectDef.Base : "");
+            effectParameters.m_position = effectDef.Position?.ToUnityVector() ?? Vector3.zero;
+            effectParameters.m_direction = effectDef.Direction?.ToUnityVector() ?? Vector3.zero;
+            effectParameters.m_maxSpeed = Util.SpeedKmHToEffect(effectDef.MaxSpeed);
+            effectParameters.m_minSpeed = Util.SpeedKmHToEffect(effectDef.MinSpeed);
+
+            createdEffects.TryGetValue(effectParameters, out effectWrapper);
 
             if(effectWrapper == null)
             {
-                Debug.Log("Requested Vehicle Effect Wrapper does not exist yet, creating a new one.");
                 effectWrapper = gameObject.AddComponent<VehicleEffectWrapper>();
 
-                if(effect is LightEffect)
+                if(baseEffect is LightEffect)
                 {
-                    var lightEffect = effect as LightEffect;
+                    var lightEffect = baseEffect as LightEffect;
 
                     // There are some cases in which the effect won't render, so we need a copy that can be rendered the way we need it
                     if(lightEffect.m_batchedLight || lightEffect.m_positionIndex >= 0)
@@ -72,18 +77,14 @@ namespace VehicleEffects.Effects
 
                             modifiedEffects.Add(lightEffect.name, effect2);
                         }
-                        effect = effect2;
+                        baseEffect = effect2;
                     }
                 }
 
-                effectWrapper.m_wrappedEffect = effect;
-                effectWrapper.m_params = desiredParams;
+                effectWrapper.m_wrappedEffect = baseEffect;
+                effectWrapper.m_params = effectParameters;
 
-                createdEffects.Add(desiredParams, effectWrapper);
-            }
-            else
-            {
-                Debug.Log("Found existing Vehicle Effect Wrapper that matches request!");
+                createdEffects.Add(effectParameters, effectWrapper);
             }
 
             return effectWrapper;

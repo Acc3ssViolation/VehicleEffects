@@ -27,7 +27,6 @@ namespace VehicleEffects
             Assembly asm = Assembly.GetAssembly(typeof(VehicleEffectsMod));
             var pluginInfo = ColossalFramework.Plugins.PluginManager.instance.FindPluginInfo(asm);
 
-            Debug.Log(pluginInfo.modPath);
 
             try
             {

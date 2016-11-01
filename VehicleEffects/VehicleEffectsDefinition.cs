@@ -22,10 +22,14 @@ namespace VehicleEffects
             [XmlAttribute("name"), DefaultValue(null)]
             public string Name { get; set; }
 
+            [XmlAttribute("applyToTrailersOnly"), DefaultValue(false)]
+            public bool ApplyToTrailersOnly { get; set; }
+
             public List<Effect> Effects { get; set; }
 
             public Vehicle()
             {
+                ApplyToTrailersOnly = false;
                 Effects = new List<Effect>();
             }
         }

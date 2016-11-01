@@ -53,7 +53,7 @@ namespace VehicleEffects.Effects
             }
             else
             {
-                Debug.Log("Could not find default train sound effect!");
+                Debug.LogError("Could not find default train sound effect!");
                 return null;
             }
         }

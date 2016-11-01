@@ -19,7 +19,7 @@ namespace VehicleEffects.Effects
         /// </summary>
         /// <param name="parent"></param>
         /// <returns></returns>
-        public static GameObject CreateEffectObject(Transform parent)
+        public static EffectInfo CreateEffectObject(Transform parent)
         {
             ParticleEffect templateParticleEffect = VehicleEffectsMod.FindEffect("Factory Steam") as ParticleEffect;
             MovementParticleEffect templateMovementEffect = VehicleEffectsMod.FindEffect("Gravel Dust") as MovementParticleEffect;
@@ -66,7 +66,6 @@ namespace VehicleEffects.Effects
                 }
                 else
                 {
-                    Debug.LogWarning("Could not use bundle, creating new game object.");
                     obj = new GameObject(effectName);
                 }
 
@@ -152,7 +151,7 @@ namespace VehicleEffects.Effects
 
                 gameObject = obj;
 
-                return obj;
+                return vehicleSteam;
             }
             else
             {

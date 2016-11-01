@@ -27,7 +27,7 @@ namespace VehicleEffects.Effects
         }
 
 
-        public static EffectInfo CreateEffect(VehicleEffectWrapper.VehicleEffectParams parameters, MultiEffect.SubEffect[] subEffects, float duration, bool useSimulationTime)
+        public static EffectInfo CreateEffect(VehicleEffectsDefinition.Effect effectDef, MultiEffect.SubEffect[] subEffects, float duration, bool useSimulationTime)
         {
             if(gameObject == null)
             {
@@ -35,21 +35,27 @@ namespace VehicleEffects.Effects
                 return null;
             }
 
+            var effectParameters = new VehicleEffectWrapper.VehicleEffectParams();
+            effectParameters.m_name = ((effectDef.Replacment == null) ? effectDef.Name : effectDef.Replacment) + ((effectDef.Base != null) ? " - " + effectDef.Base : "");
+            effectParameters.m_position = effectDef.Position?.ToUnityVector() ?? Vector3.zero;
+            effectParameters.m_direction = effectDef.Direction?.ToUnityVector() ?? Vector3.zero;
+            effectParameters.m_maxSpeed = Util.SpeedKmHToEffect(effectDef.MaxSpeed);
+            effectParameters.m_minSpeed = Util.SpeedKmHToEffect(effectDef.MinSpeed);
+
+
             CustomMultiEffect effect = null;
 
-            Debug.Log("Creating MultiEffect for request...");
 
             var i = 0;
             while(effect == null && i < createdEffects.Count)
             {
-                if(createdEffects[i].m_params.Equals(parameters))
+                if(createdEffects[i].m_params.Equals(effectParameters))
                 {
                     if(createdEffects[i].m_duration == duration && createdEffects[i].m_useSimulationTime == useSimulationTime)
                     {
                         if(createdEffects[i].m_effects.SequenceEqual(subEffects))
                         {
                             effect = createdEffects[i];
-                            Debug.Log("Found existing MultiEffect that matches request!");
                         }
                     }
                 }
@@ -58,10 +64,9 @@ namespace VehicleEffects.Effects
 
             if(effect == null)
             {
-                Debug.Log("Could not find existing MultiEffect that matches request, creating a new one!");
                 effect = gameObject.AddComponent<CustomMultiEffect>();
 
-                effect.m_params = parameters;
+                effect.m_params = effectParameters;
                 effect.m_duration = duration;
                 effect.m_useSimulationTime = useSimulationTime;
                 effect.m_effects = subEffects;

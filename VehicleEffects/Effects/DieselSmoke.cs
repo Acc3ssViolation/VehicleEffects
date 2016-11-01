@@ -17,7 +17,7 @@ namespace VehicleEffects.Effects
         /// </summary>
         /// <param name="parent"></param>
         /// <returns></returns>
-        public static GameObject CreateEffectObject(Transform parent)
+        public static EffectInfo CreateEffectObject(Transform parent)
         {
             ParticleEffect templateParticleEffect = VehicleEffectsMod.FindEffect("Factory Smoke Small") as ParticleEffect;
 
@@ -61,7 +61,7 @@ namespace VehicleEffects.Effects
 
                 dieselSmoke.m_maxSpawnAngle = 20.0f;
 
-                return gameObject;
+                return dieselSmoke;
             }
             else
             {
