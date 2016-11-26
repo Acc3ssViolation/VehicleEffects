@@ -29,6 +29,7 @@ namespace VehicleEffects
 
         private List<SoundEffectOptions> soundEffectOptions;
 
+        ReloadEffectsBehaviour reloadBehaviour;
 
         public string Description
         {
@@ -108,6 +109,9 @@ namespace VehicleEffects
 
             vehicleEffectsDefParseErrors = null;
             hasChangedPrefabs = true;
+
+            reloadBehaviour = gameObject.AddComponent<ReloadEffectsBehaviour>();
+            reloadBehaviour.SetMod(this);
         }
 
         public override void OnLevelUnloading()
@@ -169,6 +173,13 @@ namespace VehicleEffects
             }
 
             Debug.Log("Vehicle Effects Mod - Done creating effect objects");
+        }
+
+        public void ReloadVehicleEffects()
+        {
+            Debug.Log("Vehicle Effects Mod - Reloading Vehicle Effects");
+            ResetVehicleEffects();
+            UpdateVehicleEffects();
         }
 
         private void ResetVehicleEffects()
