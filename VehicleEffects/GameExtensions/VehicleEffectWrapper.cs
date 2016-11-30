@@ -43,13 +43,13 @@ namespace VehicleEffects.GameExtensions
             }
         }
 
-        public override void RenderEffect(InstanceID id, SpawnArea area, Vector3 velocity, float acceleration, float magnitude, float timeDelta, RenderManager.CameraInfo cameraInfo)
+        public override void RenderEffect(InstanceID id, SpawnArea area, Vector3 velocity, float acceleration, float magnitude, float timeOffset, float timeDelta, RenderManager.CameraInfo cameraInfo)
         {
             if(velocity.magnitude >= m_params.m_minSpeed && velocity.magnitude <= m_params.m_maxSpeed)
             {
                 // Add pos, dir and scale to matrix
                 area.m_matrix = area.m_matrix * Matrix4x4.TRS(m_params.m_position, Quaternion.LookRotation(m_params.m_direction), Vector3.one);
-                m_wrappedEffect.RenderEffect(id, area, velocity, acceleration, magnitude, timeDelta, cameraInfo);
+                m_wrappedEffect.RenderEffect(id, area, velocity, acceleration, magnitude, timeOffset, timeDelta, cameraInfo);
             }
         }
 

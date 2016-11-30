@@ -17,7 +17,7 @@ namespace VehicleEffects.GameExtensions
         public ParticleSystem m_particleSystemOverride;
 
 
-        public override void RenderEffect(InstanceID id, EffectInfo.SpawnArea area, Vector3 velocity, float acceleration, float magnitude, float timeDelta, RenderManager.CameraInfo cameraInfo)
+        public override void RenderEffect(InstanceID id, EffectInfo.SpawnArea area, Vector3 velocity, float acceleration, float magnitude, float timeOffset, float timeDelta, RenderManager.CameraInfo cameraInfo)
         {
             
             Vector3 point = area.m_matrix.MultiplyPoint(Vector3.zero);
