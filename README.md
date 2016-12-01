@@ -5,7 +5,7 @@ Mod for Cities: Skylines
 
 This mod contains some custom effects. You can also create a mod to create your own custom effects.
 
-To make sure that your effect objects are created before the vehicle effect definitions are parsed, you must use this mod's plugin system.
+To make sure that your effect objects are created before the vehicle effect definitions are parsed, you must use this mod's plugin system. This is handled by `VehicleEffects.Plugins.EffectPluginManager`.
 It will wait with parsing the effect definitions until all registered plugins are either loaded or deregistered.
 
 There are two steps to using the plugin system:
