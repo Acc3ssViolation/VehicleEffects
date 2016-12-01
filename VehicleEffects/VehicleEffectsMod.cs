@@ -37,7 +37,7 @@ namespace VehicleEffects
         {
             get
             {
-                return "Updated with Asset Editor functionality! Allows extra effects to be added to vehicles.";
+                return "Allows extra effects to be added to vehicles. Updated for 1.6";
             }
         }
 
@@ -45,7 +45,7 @@ namespace VehicleEffects
         {
             get
             {
-                return "Vehicle Effects";
+                return "Vehicle Effects 1.2";
             }
         }
 
@@ -102,18 +102,18 @@ namespace VehicleEffects
 
             if(mode != LoadMode.LoadGame && mode != LoadMode.NewGame)
             {
-                if(mode == LoadMode.LoadAsset || mode == LoadMode.NewAsset)
+                /*if(mode == LoadMode.LoadAsset || mode == LoadMode.NewAsset)
                 {
                     UIView view = UIView.GetAView();
                     uiGameObject = new GameObject();
                     uiGameObject.transform.SetParent(view.transform);
                     uiGameObject.AddComponent<Editor.UIMainPanel>().SetEditorWarning(showEditorWarning);
                     uiGameObject.AddComponent<Editor.PrefabWatcher>();
-                }
+                }*/
                 return;
             }
 
-            if(!Plugins.PluginManager.HasPlugins())
+            if(!Plugins.EffectPluginManager.HasPlugins())
             {
                 Logging.Log("No plugins registered, updating vehicles");
                 UpdateVehicleEffects();
@@ -122,7 +122,7 @@ namespace VehicleEffects
             {
                 Logging.Log("Plugins registered, postponing vehicle update");
                 pluginEventRegistered = true;
-                Plugins.PluginManager.eventAllPluginsFinished += PluginManager_eventAllPluginsFinished;
+                Plugins.EffectPluginManager.eventAllPluginsFinished += PluginManager_eventAllPluginsFinished;
             }
         }
 
@@ -135,7 +135,7 @@ namespace VehicleEffects
         {
             if(pluginEventRegistered)
             {
-                Plugins.PluginManager.eventAllPluginsFinished -= PluginManager_eventAllPluginsFinished;
+                Plugins.EffectPluginManager.eventAllPluginsFinished -= PluginManager_eventAllPluginsFinished;
             }
             if(uiGameObject != null)
             {
