@@ -35,7 +35,7 @@ namespace VehicleEffects.Effects
             }
             else
             {
-                Debug.Log("Could not find template for " + effectName);
+                Logging.Log("Could not find template for " + effectName);
                 return null;
             }
         }

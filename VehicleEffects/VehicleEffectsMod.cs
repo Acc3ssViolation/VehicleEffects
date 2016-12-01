@@ -19,13 +19,16 @@ namespace VehicleEffects
     {
         private HashSet<string> vehicleEffectsDefParseErrors;
         private SavedBool showParseErrors = new SavedBool("ShowParseErrors", "VehicleEffectsMod", true, true);
+        private SavedBool showEditorWarning = new SavedBool("ShowEditorWarning", "VehicleEffectsMod", true, true);
 
         private GameObject gameObject;
+        private GameObject uiGameObject;
 
         private List<VehicleEffectsDefinition.Vehicle> effectPlacementRequests;
         //private List<EffectChange> changes = new List<EffectChange>();
         private Dictionary<VehicleInfo, VehicleInfo.Effect[]> changes = new Dictionary<VehicleInfo, VehicleInfo.Effect[]>();
         private bool hasChangedPrefabs;
+        private bool pluginEventRegistered;
 
         private List<SoundEffectOptions> soundEffectOptions;
 
@@ -34,7 +37,7 @@ namespace VehicleEffects
         {
             get
             {
-                return "Allows some extra effects to be added to vehicles";
+                return "Updated with Asset Editor functionality! Allows extra effects to be added to vehicles.";
             }
         }
 
@@ -42,7 +45,7 @@ namespace VehicleEffects
         {
             get
             {
-                return "Vehicle Effects (Alpha)";
+                return "Vehicle Effects";
             }
         }
 
@@ -62,6 +65,9 @@ namespace VehicleEffects
             UIHelperBase group = helper.AddGroup("Generic options");
             group.AddCheckbox("Display error messages", showParseErrors.value, (bool c) => {
                 showParseErrors.value = c;
+            });
+            group.AddCheckbox("Display editor warning", showEditorWarning.value, (bool c) => {
+                showEditorWarning.value = c;
             });
 
             group = helper.AddGroup("Sound Effect Volumes");
@@ -89,53 +95,75 @@ namespace VehicleEffects
 
         public override void OnLevelLoaded(LoadMode mode)
         {
+            pluginEventRegistered = false;
+            hasChangedPrefabs = false;
+
             InitializeGameObjects();
 
             if(mode != LoadMode.LoadGame && mode != LoadMode.NewGame)
             {
-                hasChangedPrefabs = false;
+                if(mode == LoadMode.LoadAsset || mode == LoadMode.NewAsset)
+                {
+                    UIView view = UIView.GetAView();
+                    uiGameObject = new GameObject();
+                    uiGameObject.transform.SetParent(view.transform);
+                    uiGameObject.AddComponent<Editor.UIMainPanel>().SetEditorWarning(showEditorWarning);
+                    uiGameObject.AddComponent<Editor.PrefabWatcher>();
+                }
                 return;
             }
 
-            UpdateVehicleEffects();
-
-            if(vehicleEffectsDefParseErrors?.Count > 0 && showParseErrors)
+            if(!Plugins.PluginManager.HasPlugins())
             {
-                var errorMessage = vehicleEffectsDefParseErrors.Aggregate("Error while parsing vehicle effect definition file(s). Contact the author of the assets. \n" + "List of errors:\n", (current, error) => current + (error + '\n'));
-
-                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Vehicle Effects", errorMessage, true);
+                Logging.Log("No plugins registered, updating vehicles");
+                UpdateVehicleEffects();
             }
+            else
+            {
+                Logging.Log("Plugins registered, postponing vehicle update");
+                pluginEventRegistered = true;
+                Plugins.PluginManager.eventAllPluginsFinished += PluginManager_eventAllPluginsFinished;
+            }
+        }
 
-            vehicleEffectsDefParseErrors = null;
-            hasChangedPrefabs = true;
+        private void PluginManager_eventAllPluginsFinished()
+        {
+            UpdateVehicleEffects();
         }
 
         public override void OnLevelUnloading()
         {
-            if(!hasChangedPrefabs)
+            if(pluginEventRegistered)
             {
-                return;
+                Plugins.PluginManager.eventAllPluginsFinished -= PluginManager_eventAllPluginsFinished;
             }
-
-            ResetVehicleEffects();
+            if(uiGameObject != null)
+            {
+                GameObject.Destroy(uiGameObject);
+                uiGameObject = null;
+            }
+            if(hasChangedPrefabs)
+            {
+                ResetVehicleEffects();
+            }
         }
 
         private void InitializeGameObjects()
         {
-            Debug.Log("Vehicle Effects Mod - Initializing Game Objects");
+            Logging.Log("Initializing Game Objects");
             if(gameObject == null)
             {
-                Debug.Log("Vehicle Effects Mod - Game Objects not created, creating new Game Objects");
+                Logging.Log("Game Objects not created, creating new Game Objects");
                 gameObject = new GameObject("Vehicle Effects Mod");
                 UnityEngine.Object.DontDestroyOnLoad(gameObject);
                 CreateCustomEffects();
             }
-            Debug.Log("Vehicle Effects Mod - Done initializing Game Objects");
+            Logging.Log("Done initializing Game Objects");
         }
 
         private void CreateCustomEffects()
         {
-            Debug.Log("Vehicle Effects Mod - Creating effect objects");
+            Logging.Log("Creating effect objects");
 
             var t = gameObject.transform;
 
@@ -168,18 +196,18 @@ namespace VehicleEffects
                 option.Initialize();
             }
 
-            Debug.Log("Vehicle Effects Mod - Done creating effect objects");
+            Logging.Log("Done creating effect objects");
         }
 
         private void ResetVehicleEffects()
         {
-            Debug.Log("Vehicle Effects Mod - Starting effect reset");
+            Logging.Log("Starting effect reset");
             foreach(var change in changes)
             {
                 change.Key.m_effects = change.Value;
             }
             changes.Clear();
-            Debug.Log("Vehicle Effects Mod - Done resetting effects");
+            Logging.Log("Done resetting effects");
         }
 
         private void UpdateVehicleEffects()
@@ -202,28 +230,28 @@ namespace VehicleEffects
                     var crpPath = asset?.package?.packagePath;
                     if(crpPath == null) continue;
 
-                    var lightPropsDefPath = Path.Combine(Path.GetDirectoryName(crpPath) ?? "",
+                    var vehicleEffectsDefPath = Path.Combine(Path.GetDirectoryName(crpPath) ?? "",
                         "VehicleEffectsDefinition.xml");
 
                     // skip files which were already parsed
-                    if(checkedPaths.Contains(lightPropsDefPath)) continue;
-                    checkedPaths.Add(lightPropsDefPath);
+                    if(checkedPaths.Contains(vehicleEffectsDefPath)) continue;
+                    checkedPaths.Add(vehicleEffectsDefPath);
 
-                    if(!File.Exists(lightPropsDefPath)) continue;
+                    if(!File.Exists(vehicleEffectsDefPath)) continue;
 
                     VehicleEffectsDefinition vehicleEffectsDef = null;
 
                     var xmlSerializer = new XmlSerializer(typeof(VehicleEffectsDefinition));
                     try
                     {
-                        using(var streamReader = new System.IO.StreamReader(lightPropsDefPath))
+                        using(var streamReader = new System.IO.StreamReader(vehicleEffectsDefPath))
                         {
                             vehicleEffectsDef = xmlSerializer.Deserialize(streamReader) as VehicleEffectsDefinition;
                         }
                     }
                     catch(Exception e)
                     {
-                        Debug.LogException(e);
+                        Logging.LogException(e);
                         vehicleEffectsDefParseErrors.Add(asset.package.packageName + " - " + e.Message);
                         continue;
                     }
@@ -236,38 +264,46 @@ namespace VehicleEffects
 
                     foreach(var vehicleDef in vehicleEffectsDef.Vehicles)
                     {
-                        ParseVehicleDefinition(vehicleDef, asset);
+                        ParseVehicleDefinition(vehicleDef, asset.package.packageName, ref changes, ref vehicleEffectsDefParseErrors);
                     }
                 }
-
-
             }
             catch(Exception e)
             {
-                Debug.LogException(e);
+                Logging.LogException(e);
             }
+
+            if(vehicleEffectsDefParseErrors?.Count > 0 && showParseErrors)
+            {
+                var errorMessage = vehicleEffectsDefParseErrors.Aggregate("Error while parsing vehicle effect definition file(s). Assets will work but may have effects missing. Contact the author of the asset(s). \n" + "List of errors:\n", (current, error) => current + (error + '\n'));
+
+                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Vehicle Effects", errorMessage, false);
+            }
+
+            vehicleEffectsDefParseErrors = null;
+            hasChangedPrefabs = true;
         }
 
-        private void ParseVehicleDefinition(VehicleEffectsDefinition.Vehicle vehicleDef, Package.Asset asset)
+        public static void ParseVehicleDefinition(VehicleEffectsDefinition.Vehicle vehicleDef, string packageName, ref Dictionary<VehicleInfo, VehicleInfo.Effect[]> backup, ref HashSet<string> parseErrors)
         {
             if(vehicleDef?.Name == null)
             {
-                vehicleEffectsDefParseErrors.Add(asset.package.packageName + " - Vehicle name missing.");
+                parseErrors.Add(packageName + " - Vehicle name missing.");
                 return;
             }
 
-            var vehicleDefPrefab = FindVehicle(vehicleDef.Name, asset.package.packageName);
+            var vehicleDefPrefab = FindVehicle(vehicleDef.Name, packageName);
 
             if(vehicleDefPrefab == null)
             {
-                vehicleEffectsDefParseErrors.Add(asset.package.packageName + " - Vehicle with name " + vehicleDef.Name +
+                parseErrors.Add(packageName + " - Vehicle with name " + vehicleDef.Name +
                                              " not loaded.");
                 return;
             }
 
             if(vehicleDef.Effects == null || vehicleDef.Effects.Count == 0)
             {
-                vehicleEffectsDefParseErrors.Add(asset.package.packageName + " - No effects specified for " +
+                parseErrors.Add(packageName + " - No effects specified for " +
                                              vehicleDef.Name + ".");
                 return;
             }
@@ -286,7 +322,7 @@ namespace VehicleEffects
                     var trailerDef = new VehicleEffectsDefinition.Vehicle();
                     trailerDef.Name = trailerName;
                     trailerDef.Effects = vehicleDef.Effects;
-                    ParseVehicleDefinition(trailerDef, asset);
+                    ParseVehicleDefinition(trailerDef, packageName, ref backup, ref parseErrors);
                 }
 
                 return;
@@ -294,11 +330,11 @@ namespace VehicleEffects
 
 
             // Backup default effects array
-            if(!changes.ContainsKey(vehicleDefPrefab))
+            if(!backup.ContainsKey(vehicleDefPrefab))
             {
                 var effects = new VehicleInfo.Effect[vehicleDefPrefab.m_effects.Length];
                 vehicleDefPrefab.m_effects.CopyTo(effects, 0);
-                changes.Add(vehicleDefPrefab, effects);
+                backup.Add(vehicleDefPrefab, effects);
             }
 
 
@@ -307,7 +343,17 @@ namespace VehicleEffects
 
             foreach(var effectDef in vehicleDef.Effects)
             {
-                ParseEffectDefinition(vehicleDef, effectDef, vehicleEffectsList);
+                ParseEffectDefinition(vehicleDef, effectDef, vehicleEffectsList, ref parseErrors);
+            }
+
+            // Remove and log null effects
+            for(int i = vehicleEffectsList.Count - 1; i >= 0; i--)
+            {
+                if(vehicleEffectsList[i].m_effect == null)
+                {
+                    Logging.LogWarning("Found effect that is NULL for vehicle " + vehicleDef.Name + " at index " + i + ", removing.");
+                    vehicleEffectsList.RemoveAt(i);
+                }
             }
 
             // Update the VehicleInfo with the new effects
@@ -327,11 +373,11 @@ namespace VehicleEffects
             }
         }
 
-        private void ParseEffectDefinition(VehicleEffectsDefinition.Vehicle vehicleDef, VehicleEffectsDefinition.Effect effectDef, List<VehicleInfo.Effect> effectsList)
+        public static void ParseEffectDefinition(VehicleEffectsDefinition.Vehicle vehicleDef, VehicleEffectsDefinition.Effect effectDef, List<VehicleInfo.Effect> effectsList, ref HashSet<string> parseErrors)
         {
             if(effectDef?.Name == null)
             {
-                vehicleEffectsDefParseErrors.Add(vehicleDef.Name + " - Effect name missing.");
+                parseErrors.Add(vehicleDef.Name + " - Effect name missing.");
                 return;
             }
 
@@ -355,19 +401,19 @@ namespace VehicleEffects
                             effectPrefab = CustomVehicleEffect.CreateEffect(effectDef, baseEffect);
                             if(effectPrefab == null)
                             {
-                                vehicleEffectsDefParseErrors.Add(vehicleDef.Name + ": An error occured trying to create a custom effect. Check debug log for details.");
+                                parseErrors.Add(vehicleDef.Name + ": An error occured trying to create a custom effect. Check debug log for details.");
                                 return;
                             }
                         }
                         else
                         {
-                            vehicleEffectsDefParseErrors.Add(vehicleDef.Name + ": Vehicle Effect Wrapper base effect " + effectDef.Base + " was not loaded!");
+                            parseErrors.Add(vehicleDef.Name + ": Vehicle Effect Wrapper base effect " + effectDef.Base + " was not loaded!");
                             return;
                         }
                     }
                     else
                     {
-                        vehicleEffectsDefParseErrors.Add(vehicleDef.Name + ": Vehicle Effect Wrapper requires a base effect but it wasn't given");
+                        parseErrors.Add(vehicleDef.Name + ": Vehicle Effect Wrapper requires a base effect but it wasn't given");
                         return;
                     }
                 }
@@ -380,7 +426,7 @@ namespace VehicleEffects
                         foreach(var subEffect in effectDef.SubEffects)
                         {
                             var dummyList = new List<VehicleInfo.Effect>();
-                            ParseEffectDefinition(vehicleDef, subEffect.Effect, dummyList);
+                            ParseEffectDefinition(vehicleDef, subEffect.Effect, dummyList, ref parseErrors);
                             if(dummyList.Count > 0)
                             {
                                 loadedSubEffects.Add(new MultiEffect.SubEffect()
@@ -396,7 +442,7 @@ namespace VehicleEffects
                     }
                     else
                     {
-                        vehicleEffectsDefParseErrors.Add(vehicleDef.Name + " Vehicle Effect Multi with no sub effects!");
+                        parseErrors.Add(vehicleDef.Name + " Vehicle Effect Multi with no sub effects!");
                         return;
                     }
                 }
@@ -407,14 +453,14 @@ namespace VehicleEffects
                 }
                 else
                 {
-                    vehicleEffectsDefParseErrors.Add(vehicleDef.Name + " requested non-existing effect " + effectName);
+                    parseErrors.Add(vehicleDef.Name + " requested non-existing effect " + effectName);
                     return;
                 }
             }
 
             if(effectPrefab == null && !effectName.Equals("None"))
             {
-                vehicleEffectsDefParseErrors.Add(vehicleDef.Name + " - Effect with name " + effectDef.Name + " not loaded.");
+                parseErrors.Add(vehicleDef.Name + " - Effect with name " + effectDef.Name + " not loaded.");
                 return;
             }
 

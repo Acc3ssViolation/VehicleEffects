@@ -23,7 +23,7 @@ namespace VehicleEffects.Effects
 
             if(gameObject != null)
             {
-                Debug.LogWarning("Creating effect object for " + effectName + " but object already exists!");
+                Logging.LogWarning("Creating effect object for " + effectName + " but object already exists!");
             }
 
             if(templateParticleEffect != null)
@@ -65,7 +65,7 @@ namespace VehicleEffects.Effects
             }
             else
             {
-                Debug.LogError("Could not find default effects used for " + effectName + "!");
+                Logging.LogError("Could not find default effects used for " + effectName + "!");
                 return null;
             }
         }

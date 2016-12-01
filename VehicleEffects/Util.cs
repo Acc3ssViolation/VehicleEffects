@@ -36,7 +36,7 @@ namespace VehicleEffects
             }
             catch(Exception e)
             {
-                Debug.Log("Exception trying to load audio file '" + filename + "'!" + e.ToString());
+                Logging.Log("Exception trying to load audio file '" + filename + "'!" + e.ToString());
                 return null;
             }
         }

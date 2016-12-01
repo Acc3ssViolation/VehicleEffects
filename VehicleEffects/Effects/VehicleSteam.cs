@@ -26,7 +26,7 @@ namespace VehicleEffects.Effects
 
             if(gameObject != null)
             {
-                Debug.LogWarning("Creating effect object for " + effectName + " but object already exists!");
+                Logging.LogWarning("Creating effect object for " + effectName + " but object already exists!");
             }
 
             if(templateParticleEffect != null && templateMovementEffect != null)
@@ -49,15 +49,15 @@ namespace VehicleEffects.Effects
                     AssetBundle bundle = www.assetBundle;
 
 
-                    Debug.Log("Bundle loading " + ((bundle == null) ? "failed " + www.error : "succeeded"));
+                    Logging.Log("Bundle loading " + ((bundle == null) ? "failed " + www.error : "succeeded"));
                     UnityEngine.Object a = bundle.LoadAsset("ParticleSystemSteam");
-                    Debug.Log("Asset unpacking " + ((a == null) ? "failed " : "succeeded"));
+                    Logging.Log("Asset unpacking " + ((a == null) ? "failed " : "succeeded"));
                     obj = GameObject.Instantiate(a) as GameObject;
                     bundle.Unload(false);
                 }
                 catch(Exception e)
                 {
-                    Debug.Log("Exception trying to load bundle file!" + e.ToString());
+                    Logging.Log("Exception trying to load bundle file!" + e.ToString());
                 }
 
                 if(obj != null)
@@ -155,7 +155,7 @@ namespace VehicleEffects.Effects
             }
             else
             {
-                Debug.LogError("Could not find default effects used for Vehicle Steam Effect!");
+                Logging.LogError("Could not find default effects used for Vehicle Steam Effect!");
                 return null;
             }
         }

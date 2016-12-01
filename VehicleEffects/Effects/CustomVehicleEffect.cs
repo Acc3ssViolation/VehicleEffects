@@ -19,7 +19,7 @@ namespace VehicleEffects.Effects
         {
             if(gameObject != null)
             {
-                Debug.LogWarning("Creating effect object for " + effectName + " but object already exists!");
+                Logging.LogWarning("Creating effect object for " + effectName + " but object already exists!");
             }
 
             modifiedEffects = new Dictionary<string, EffectInfo>();
@@ -35,7 +35,7 @@ namespace VehicleEffects.Effects
         {
             if(gameObject == null)
             {
-                Debug.LogError("Tried to create EffectInfo for " + effectName + " but GameObject was not created!");
+                Logging.LogError("Tried to create EffectInfo for " + effectName + " but GameObject was not created!");
                 return null;
             }
 
