@@ -16,7 +16,7 @@ namespace VehicleEffects.Effects
         {
             if(gameObject != null)
             {
-                Debug.LogWarning("Creating effect object for " + effectName + " but object already exists!");
+                Logging.LogWarning("Creating effect object for " + effectName + " but object already exists!");
             }
 
             gameObject = new GameObject(effectName + " Effects");

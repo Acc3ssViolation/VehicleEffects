@@ -41,7 +41,7 @@ namespace VehicleEffects
             effect = VehicleEffectsMod.FindEffect(effectName) as SoundEffect;
             if(effect == null)
             {
-                Debug.LogWarning("Could not find effect: " + effectName + " for sound effect options");
+                Logging.LogWarning("Could not find effect: " + effectName + " for sound effect options");
                 return;
             }
             EventSlide(savedVolume.value);
@@ -49,11 +49,11 @@ namespace VehicleEffects
 
         private void EventSlide(float c)
         {
-            Debug.Log(c);
+            Logging.Log(c);
             savedVolume.value = c;
             if(effect != null)
             {
-                Debug.Log(effectName + " has changed");
+                Logging.Log(effectName + " has changed");
                 effect.m_audioInfo.m_volume = c;
             }
         }

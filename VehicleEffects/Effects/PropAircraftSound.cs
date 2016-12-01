@@ -48,7 +48,7 @@ namespace VehicleEffects.Effects
             }
             else
             {
-                Debug.LogError("Could not find default plane sound effect!");
+                Logging.LogError("Could not find default plane sound effect!");
                 return null;
             }
         }

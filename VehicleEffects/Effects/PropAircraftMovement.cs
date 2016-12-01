@@ -25,7 +25,7 @@ namespace VehicleEffects.Effects
             }
             else
             {
-                Debug.LogError("Could not find default plane movement effect!");
+                Logging.LogError("Could not find default plane movement effect!");
                 return null;
             }
         }
