@@ -54,6 +54,12 @@ namespace VehicleEffects
             [XmlAttribute("base"), DefaultValue(null)]
             public string Base { get; set; }
 
+            /// <summary>
+            /// Effect used in case base or replacement can't be found (optional)
+            /// </summary>
+            [XmlAttribute("fallback"), DefaultValue(null)]
+            public string Fallback { get; set; }
+
             // VehicleEffectWrapper params
             public Vector Position { get; set; }
             public Vector Direction { get; set; }

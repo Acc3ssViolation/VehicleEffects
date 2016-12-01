@@ -82,7 +82,6 @@
     <Compile Include="GameExtensions\CustomMovementParticleEffect.cs" />
     <Compile Include="Effects\SteamTrainMovement.cs" />
     <Compile Include="Logging.cs" />
-    <Compile Include="Plugins\EffectPluginManager.cs" />
     <Compile Include="ReloadEffectsBehaviour.cs" />
     <Compile Include="SoundEffectOptions.cs" />
     <Compile Include="Util.cs" />

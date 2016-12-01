@@ -49,11 +49,9 @@ namespace VehicleEffects
 
         private void EventSlide(float c)
         {
-            Logging.Log(c);
             savedVolume.value = c;
             if(effect != null)
             {
-                Logging.Log(effectName + " has changed");
                 effect.m_audioInfo.m_volume = c;
             }
         }

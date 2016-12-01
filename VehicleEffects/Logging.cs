@@ -27,6 +27,7 @@ namespace VehicleEffects
 
         public static void LogException(Exception e)
         {
+            Log("An exception was thrown:");
             Debug.LogException(e);
         }
     }
