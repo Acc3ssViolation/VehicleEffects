@@ -103,6 +103,7 @@ namespace VehicleEffects
 
             if(mode != LoadMode.LoadGame && mode != LoadMode.NewGame)
             {
+                // Editor is disabled for now
                 /*if(mode == LoadMode.LoadAsset || mode == LoadMode.NewAsset)
                 {
                     UIView view = UIView.GetAView();
