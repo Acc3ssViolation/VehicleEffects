@@ -14,8 +14,22 @@ namespace VehicleEffects.GameExtensions
         /// </summary>
         public float m_spawnAreaRadius = 0.25f;
 
-        public ParticleSystem m_particleSystemOverride;
+        private ParticleSystem m_particleSystemOverride;
 
+        private string m_particleSystemOverrideName = null;
+
+        public ParticleSystem ParticleSystemOverride
+        {
+            get
+            {
+                return m_particleSystemOverride;
+            }
+            set
+            {
+                m_particleSystemOverride = value;
+                m_particleSystemOverrideName = m_particleSystemOverride.gameObject.name;
+            }
+        }
 
         public override void RenderEffect(InstanceID id, EffectInfo.SpawnArea area, Vector3 velocity, float acceleration, float magnitude, float timeOffset, float timeDelta, RenderManager.CameraInfo cameraInfo)
         {
@@ -39,11 +53,15 @@ namespace VehicleEffects.GameExtensions
 
         public new void EmitParticles(InstanceID id, Matrix4x4 matrix, Vector4[] positions, Vector3 velocity, float particlesPerSquare, int probability, ref Vector3 min, ref Vector3 max)
         {
+            // Fix for reloading from main menu
+            if(m_particleSystemOverrideName != null && m_particleSystemOverride == null)
+                m_particleSystemOverride = VehicleEffectsMod.FindEffect(m_particleSystemOverrideName)?.GetComponent<ParticleSystem>();
             if(m_particleSystemOverride != null && m_particleSystemOverride != m_particleSystem)
                 m_particleSystem = m_particleSystemOverride;
 
             Randomizer randomizer = new Randomizer(id.RawData);
-            particlesPerSquare *= this.m_particleSystem.emissionRate;
+            var module = m_particleSystem.emission;
+            particlesPerSquare *= module.rate.constant;
             int num = positions.Length;
 
             if(randomizer.Int32(100u) <= probability)
@@ -52,31 +70,49 @@ namespace VehicleEffects.GameExtensions
                 float w = m_spawnAreaRadius;
 
                 float circleArea = Mathf.Max(100f, 3.14159274f * w * w);
-                int particleCount = Mathf.FloorToInt(circleArea * particlesPerSquare + UnityEngine.Random.value);
+                int particleCount = Mathf.FloorToInt(circleArea * particlesPerSquare + Random.value);
                 for(int j = 0; j < particleCount; j++)
                 {
+                    ParticleSystem.EmitParams emitParams = default(ParticleSystem.EmitParams);
                     Vector3 position = worldPoint;
-                    float startSize = this.m_particleSystem.startSize;
-                    float lifetime = this.m_minLifeTime + (this.m_maxLifeTime - this.m_minLifeTime) * UnityEngine.Random.value;
-                    float startSpeed = this.m_minStartSpeed + (this.m_maxStartSpeed - this.m_minStartSpeed) * UnityEngine.Random.value;
-
-                    Color32 color = this.m_particleSystem.startColor;
+                    float startSpeed = this.m_minStartSpeed + (this.m_maxStartSpeed - this.m_minStartSpeed) * Random.value;
 
                     // Get random velocity vector witin a cone of 2 * m_maxSpawnAngle, in the direction of m_particleVector
                     float d = 1f / Mathf.Tan(Mathf.Deg2Rad * m_maxSpawnAngle);
-                    Vector3 a = UnityEngine.Random.insideUnitCircle;
+                    Vector3 a = Random.insideUnitCircle;
                     a.z = d;
-                    Vector3 b = UnityEngine.Random.insideUnitCircle * m_spawnAreaRadius;
+                    Vector3 b = Random.insideUnitCircle * m_spawnAreaRadius;
                     b.z = 0f;
 
-                    Vector3 particleVelocity = velocity + matrix.MultiplyVector(a) * startSpeed;
                     position += matrix.MultiplyVector(b);
-                    this.m_particleSystem.Emit(position, particleVelocity, startSize, lifetime, color);
+                    emitParams.position = position;
+                    emitParams.startColor = m_particleSystem.startColor;
+                    emitParams.velocity = velocity + matrix.MultiplyVector(a) * startSpeed;
+                    emitParams.startLifetime = this.m_minLifeTime + (this.m_maxLifeTime - this.m_minLifeTime) * UnityEngine.Random.value;
+                    emitParams.startSize = this.m_particleSystem.startSize;
+                    this.m_particleSystem.Emit(emitParams, 1);
                 }
                 min = Vector3.Min(min, worldPoint - new Vector3(w, w, w));
                 max = Vector3.Max(max, worldPoint + new Vector3(w, w, w));
             }
         }
 
+        protected override void CreateEffect()
+        {
+            // Overridden to make sure the ParticleSystemOverride works correctly
+            base.CreateEffect();
+            if(this.m_effectObject == null)
+            {
+                this.m_effectObject = gameObject;
+                this.m_effectComponent = gameObject.GetComponent<ParticleEffect>();
+                this.m_particleSystem = gameObject.GetComponent<ParticleSystem>();
+                if(m_particleSystem != null)
+                {
+                    var module = this.m_particleSystem.emission;
+                    module.enabled = false;
+                }
+                this.m_particleSystems = gameObject.GetComponentsInChildren<ParticleSystem>();
+            }
+        }
     }
 }

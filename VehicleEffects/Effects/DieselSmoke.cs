@@ -47,7 +47,7 @@ namespace VehicleEffects.Effects
 
                 dieselSmoke.m_velocityMultiplier = 0.0f;
                 dieselSmoke.m_spawnAreaRadius = 0.25f;
-                dieselSmoke.m_particleSystemOverride = templateParticleEffect.gameObject.GetComponent<ParticleSystem>();
+                dieselSmoke.ParticleSystemOverride = templateParticleEffect.gameObject.GetComponent<ParticleSystem>();
 
                 dieselSmoke.m_minMagnitude = 0.1f;
                 dieselSmoke.m_magnitudeAccelerationMultiplier = 1.0f;
