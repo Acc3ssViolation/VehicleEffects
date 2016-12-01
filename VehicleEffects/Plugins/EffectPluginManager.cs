@@ -12,6 +12,7 @@ namespace VehicleEffects.Plugins
     ///     When you have finished creating effects in OnLevelLoaded call FinishedLoadingPlugin and pass the ID you got earlier.
     /// 
     /// IMPORTANT: In case the effect creation fails, call DeregisterPlugin with your ID! VE will not apply effect definitions if a plugin hasn't loaded!
+    /// If this happens, check output_log.txt for the last entry that starts with "Plugin Manager - Still waiting for:" for a list of plugins that failed to indicate that they have loaded.
     /// </summary>
     public class EffectPluginManager : LoadingExtensionBase
     {
