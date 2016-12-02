@@ -47,7 +47,7 @@ namespace VehicleEffects
         {
             get
             {
-                return "Vehicle Effects 1.2b";
+                return "Vehicle Effects 1.2c";
             }
         }
 
@@ -406,14 +406,20 @@ namespace VehicleEffects
                             // Try fallback
                             if(effectDef.Fallback != null)
                             {
-                                if (effectDef.Fallback.StartsWith("None"))
+                                Logging.Log(vehicleDef.Name + ": trying to use fallback " + effectDef.Fallback + " for " + effectName);
+                                if(effectDef.Fallback.StartsWith("None"))
                                 {
-                                    baseEffect = null;
-                                    effectName = "None";
+                                    // None specified as fallback, just exit
+                                    return;
+                                }
+                                else if(effectDef.Fallback.StartsWith("Remove") && effectDef.Replacment != null)
+                                {
+                                    // Remove the existing effect
+                                    effectName = "Remove";
+                                    effectPrefab = null;
                                 }
                                 else
                                 {
-
                                     baseEffect = FindEffect(effectDef.Fallback);
                                     if (baseEffect != null)
                                     {
@@ -428,7 +434,6 @@ namespace VehicleEffects
                                     {
                                         parseErrors.Add(vehicleDef.Name + ": Vehicle Effect Wrapper fallback " + effectDef.Fallback + " was needed for " + effectDef.Base + " but not loaded either!");
                                     }
-
                                 }
                             }
                             else
@@ -473,9 +478,11 @@ namespace VehicleEffects
                         return;
                     }
                 }
-                else if(effectName.StartsWith("None"))
+                else if(effectName.StartsWith("None") || effectName.StartsWith("Remove"))
                 {
-                    // Not a real effect, but keyword used for removal of an existing effect.
+                    // Not a real effect, but keywords used for removal of an existing effect.
+                    // 'None' included for < 1.2c compatibility
+                    effectName = "Remove";
                     effectPrefab = null;
                 }
                 else
@@ -483,21 +490,26 @@ namespace VehicleEffects
                     // Try fallback
                     if(effectDef.Fallback != null)
                     {
-                        if (effectDef.Fallback.StartsWith("None"))
+                        Logging.Log(vehicleDef.Name + ": trying to use fallback " + effectDef.Fallback + " for " + effectName);
+                        if(effectDef.Fallback.StartsWith("None"))
                         {
+                            // None specified as fallback, just exit
+                            return;
+                        }
+                        else if(effectDef.Fallback.StartsWith("Remove") && effectDef.Replacment != null)
+                        {
+                            // Remove the existing effect
+                            effectName = "Remove";
                             effectPrefab = null;
-                            effectName = "None";
                         }
                         else
                         {
-
                             effectPrefab = FindEffect(effectDef.Fallback);
                             if (effectPrefab == null)
                             {
                                 parseErrors.Add(vehicleDef.Name + " requested non-existing effect " + effectName + " and fallback " + effectDef.Fallback + " could not be found either!");
                                 return;
                             }
-
                         }
                     }
                     else
@@ -509,7 +521,7 @@ namespace VehicleEffects
                 }
             }
 
-            if(effectPrefab == null && !effectName.Equals("None"))
+            if(effectPrefab == null && !effectName.Equals("Remove"))
             {
                 parseErrors.Add(vehicleDef.Name + " - Effect with name " + effectDef.Name + " not loaded.");
                 return;
@@ -536,7 +548,7 @@ namespace VehicleEffects
                 {
                     if(effectsList[i].m_effect.name.Equals(effectDef.Name))
                     {
-                        if(effectDef.Replacment.Equals("None"))
+                        if(effectDef.Replacment.Equals("Remove"))
                         {
                             indexToRemove = i;
                             break;
