@@ -47,7 +47,7 @@ namespace VehicleEffects
         {
             get
             {
-                return "Vehicle Effects 1.2";
+                return "Vehicle Effects 1.2b";
             }
         }
 
