@@ -406,19 +406,29 @@ namespace VehicleEffects
                             // Try fallback
                             if(effectDef.Fallback != null)
                             {
-                                baseEffect = FindEffect(effectDef.Fallback);
-                                if(baseEffect != null)
+                                if (effectDef.Fallback.StartsWith("None"))
                                 {
-                                    effectPrefab = CustomVehicleEffect.CreateEffect(effectDef, baseEffect);
-                                    if(effectPrefab == null)
-                                    {
-                                        parseErrors.Add(vehicleDef.Name + ": An error occured trying to create a custom effect. Check debug log for details.");
-                                        return;
-                                    }
+                                    baseEffect = null;
+                                    effectName = "None";
                                 }
                                 else
                                 {
-                                    parseErrors.Add(vehicleDef.Name + ": Vehicle Effect Wrapper fallback " + effectDef.Fallback + " was needed for " + effectDef.Base + " but not loaded either!");
+
+                                    baseEffect = FindEffect(effectDef.Fallback);
+                                    if (baseEffect != null)
+                                    {
+                                        effectPrefab = CustomVehicleEffect.CreateEffect(effectDef, baseEffect);
+                                        if (effectPrefab == null)
+                                        {
+                                            parseErrors.Add(vehicleDef.Name + ": An error occured trying to create a custom effect. Check debug log for details.");
+                                            return;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        parseErrors.Add(vehicleDef.Name + ": Vehicle Effect Wrapper fallback " + effectDef.Fallback + " was needed for " + effectDef.Base + " but not loaded either!");
+                                    }
+
                                 }
                             }
                             else
@@ -473,11 +483,21 @@ namespace VehicleEffects
                     // Try fallback
                     if(effectDef.Fallback != null)
                     {
-                        effectPrefab = FindEffect(effectDef.Fallback);
-                        if(effectPrefab == null)
+                        if (effectDef.Fallback.StartsWith("None"))
                         {
-                            parseErrors.Add(vehicleDef.Name + " requested non-existing effect " + effectName + " and fallback " + effectDef.Fallback + " could not be found either!");
-                            return;
+                            effectPrefab = null;
+                            effectName = "None";
+                        }
+                        else
+                        {
+
+                            effectPrefab = FindEffect(effectDef.Fallback);
+                            if (effectPrefab == null)
+                            {
+                                parseErrors.Add(vehicleDef.Name + " requested non-existing effect " + effectName + " and fallback " + effectDef.Fallback + " could not be found either!");
+                                return;
+                            }
+
                         }
                     }
                     else
