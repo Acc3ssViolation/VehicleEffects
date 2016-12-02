@@ -100,8 +100,11 @@ namespace VehicleEffects.GameExtensions
         protected override void CreateEffect()
         {
             // Overridden to make sure the ParticleSystemOverride works correctly
-            base.CreateEffect();
-            if(this.m_effectObject == null)
+            bool effectObjectWasNull = this.m_effectObject == null;
+            //base.CreateEffect();//null pointer exception, seems not to be needed for effect initialization
+           
+            //if(this.m_effectObject == null)//always false after base.CreateEffect()
+            if (effectObjectWasNull)
             {
                 this.m_effectObject = gameObject;
                 this.m_effectComponent = gameObject.GetComponent<ParticleEffect>();
