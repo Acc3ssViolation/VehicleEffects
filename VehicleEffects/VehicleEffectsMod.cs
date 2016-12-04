@@ -17,6 +17,9 @@ namespace VehicleEffects
 {
     public class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
+        public const string name = "Vehicle Effects";
+        public const string version = "1.3";
+
         private HashSet<string> vehicleEffectsDefParseErrors;
         private SavedBool showParseErrors = new SavedBool("ShowParseErrors", "VehicleEffectsMod", true, true);
         private SavedBool showEditorWarning = new SavedBool("ShowEditorWarning", "VehicleEffectsMod", true, true);
@@ -25,7 +28,6 @@ namespace VehicleEffects
         private GameObject uiGameObject;
 
         private List<VehicleEffectsDefinition.Vehicle> effectPlacementRequests;
-        //private List<EffectChange> changes = new List<EffectChange>();
         private Dictionary<VehicleInfo, VehicleInfo.Effect[]> changes = new Dictionary<VehicleInfo, VehicleInfo.Effect[]>();
         private bool hasChangedPrefabs;
         private List<SoundEffectOptions> soundEffectOptions;
@@ -47,19 +49,22 @@ namespace VehicleEffects
         {
             get
             {
-                return "Vehicle Effects 1.2c";
+                return name + " " + version;
             }
         }
 
         public VehicleEffectsMod()
         {
-            GameSettings.AddSettingsFile(new SettingsFile[]
+            if(GameSettings.FindSettingsFileByName("VehicleEffectsMod") == null)
             {
-                new SettingsFile
+                GameSettings.AddSettingsFile(new SettingsFile[]
                 {
-                    fileName = "VehicleEffectsMod"
-                }
-            });
+                    new SettingsFile
+                    {
+                        fileName = "VehicleEffectsMod"
+                    }
+                });
+            }
         }
 
         public void OnSettingsUI(UIHelperBase helper)
@@ -68,9 +73,9 @@ namespace VehicleEffects
             group.AddCheckbox("Display error messages", showParseErrors.value, (bool c) => {
                 showParseErrors.value = c;
             });
-            /*group.AddCheckbox("Display editor warning", showEditorWarning.value, (bool c) => {
+            group.AddCheckbox("Display editor warning", showEditorWarning.value, (bool c) => {
                 showEditorWarning.value = c;
-            });*/
+            });
 
             group = helper.AddGroup("Sound Effect Volumes");
 
@@ -103,15 +108,15 @@ namespace VehicleEffects
 
             if(mode != LoadMode.LoadGame && mode != LoadMode.NewGame)
             {
-                // Editor is disabled for now since it's not finished
-                /*if(mode == LoadMode.LoadAsset || mode == LoadMode.NewAsset)
+                // Editor
+                if(mode == LoadMode.LoadAsset || mode == LoadMode.NewAsset)
                 {
                     UIView view = UIView.GetAView();
                     uiGameObject = new GameObject();
                     uiGameObject.transform.SetParent(view.transform);
                     uiGameObject.AddComponent<Editor.UIMainPanel>().SetEditorWarning(showEditorWarning);
                     uiGameObject.AddComponent<Editor.PrefabWatcher>();
-                }*/
+                }
                 return;
             }
 

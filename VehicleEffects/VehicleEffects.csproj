@@ -47,9 +47,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -59,10 +57,16 @@
   <ItemGroup>
     <Compile Include="Editor\EffectPreviewer.cs" />
     <Compile Include="Editor\PrefabWatcher.cs" />
-    <Compile Include="Editor\UIAddPanel.cs" />
-    <Compile Include="Editor\UIEffectsPanel.cs" />
+    <Compile Include="Editor\UIAddEffectPanel.cs" />
+    <Compile Include="Editor\UIEffectOptionsPanel.cs" />
+    <Compile Include="Editor\UIEffectPanel.cs" />
+    <Compile Include="Editor\UIEffectRow.cs" />
+    <Compile Include="Editor\UIFastList.cs" />
+    <Compile Include="Editor\UIFlagsPanel.cs" />
+    <Compile Include="Editor\UIFloatField.cs" />
     <Compile Include="Editor\UIMainPanel.cs" />
     <Compile Include="Editor\UIUtils.cs" />
+    <Compile Include="Editor\UIVehicleEffectRow.cs" />
     <Compile Include="Effects\BlinkerLights.cs" />
     <Compile Include="Effects\CustomVehicleMultiEffect.cs" />
     <Compile Include="Effects\CustomVehicleEffect.cs" />

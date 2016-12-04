@@ -10,7 +10,7 @@ namespace VehicleEffects.Editor
     public class UIMainPanel : UIPanel
     {
         private UIButton m_toggleButton;
-        private UIEffectsPanel m_effectsPanel;
+        private UIEffectPanel m_effectsPanel;
         private bool m_showWarning;
 
         public void SetEditorWarning(bool enabled)
@@ -40,7 +40,7 @@ namespace VehicleEffects.Editor
             UIView view = UIView.GetAView();
             relativePosition = Vector3.zero;
 
-            m_effectsPanel = new GameObject().AddComponent<UIEffectsPanel>();
+            m_effectsPanel = new GameObject().AddComponent<UIEffectPanel>();
             m_effectsPanel.transform.SetParent(transform);
 
             m_toggleButton = UIUtils.CreateButton(this);

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace VehicleEffects.Editor
+namespace ExtendedAssetEditor.UI
 {
     /*
      * Code by SamsamTS, taken from the Advanced Vehicle Options mod, slightly modified
