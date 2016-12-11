@@ -10,11 +10,14 @@ namespace VehicleEffects
 {
     public class VehicleEffectsDefinition
     {
+        [XmlIgnore]
+        public bool LoadedFromMod { get; set; }
         public List<Vehicle> Vehicles { get; set; }
 
         public VehicleEffectsDefinition()
         {
             Vehicles = new List<Vehicle>();
+            LoadedFromMod = false;
         }
 
         public class Vehicle

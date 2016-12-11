@@ -114,3 +114,32 @@ namespace VehicleEffectsPack
     }
 }
 ```
+
+
+## Definition pack mod
+
+Vehicle Effects supports loading from mod directories as well. To create a mod with a definition simply put VehicleEffectsDefinition.xml in the mod's main folder.
+You can use this script as a template for your mod, see the wiki for more info on how to make mods:
+http://www.skylineswiki.com/Modding_API
+```c#
+using ICities;
+
+public class Mod : IUserMod
+{
+    public string Description
+    {
+        get
+        {
+            return "Effect definition mod template.";
+        }
+    }
+
+    public string Name
+    {
+        get
+        {
+            return "Vehicle Effects definitions pack";
+        }
+    }
+}
+```
