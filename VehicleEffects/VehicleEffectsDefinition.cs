@@ -67,16 +67,24 @@ namespace VehicleEffects
             public Vector Position { get; set; }
             public Vector Direction { get; set; }
 
+            [DefaultValue(0f)]
             public float MinSpeed { get; set; }
 
+            [DefaultValue(10000f)]
             public float MaxSpeed { get; set; }
 
+            [DefaultValue(Flags.Created)]
             public Flags RequiredFlags {get;set;}
+
+            [DefaultValue(Flags.None)]
             public Flags ForbiddenFlags { get; set; }
 
             //MultiEffect params
+            [DefaultValue(null)]
             public List<SubEffect> SubEffects { get; set; }
+            [DefaultValue(0f)]
             public float Duration;
+            [DefaultValue(true)]
             public bool UseSimulationTime;
 
             public Effect()
@@ -96,6 +104,7 @@ namespace VehicleEffects
             {
                 LeftHandDrive = int.MinValue,
                 All = -1,
+                None = 0,
                 Created = 1,
                 Deleted = 2,
                 Spawned = 4,
@@ -162,6 +171,28 @@ namespace VehicleEffects
             {
                 return new Vector3(X, Y, Z);
             }
+        }
+
+        public VehicleEffectsDefinition Copy()
+        {
+            VehicleEffectsDefinition copy = null;
+            try
+            {
+                using(System.IO.StringWriter stringWriter = new System.IO.StringWriter())
+                {
+                    XmlSerializer s = new XmlSerializer(typeof(VehicleEffectsDefinition));
+                    s.Serialize(stringWriter, this);
+                    using(System.IO.StringReader stringReader = new System.IO.StringReader(stringWriter.ToString()))
+                    {
+                        copy = (VehicleEffectsDefinition)s.Deserialize(stringReader);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                Logging.LogError("Exception trying to copy VehicleEffectsDefinition:\r\n" + e.Message + "\r\n" + e.StackTrace);
+            }
+            return copy;
         }
     }
 }

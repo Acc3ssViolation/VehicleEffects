@@ -18,10 +18,12 @@ namespace VehicleEffects
     public class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.4";
+        public const string version = "1.5";
+        public const string filename = "VehicleEffectsDefinition.xml";
 
         private HashSet<string> vehicleEffectsDefParseErrors;
         private SavedBool showParseErrors = new SavedBool("ShowParseErrors", "VehicleEffectsMod", true, true);
+        private SavedBool enableEditor = new SavedBool("EnableEditor", "VehicleEffectsMod", true, true);
         private SavedBool showEditorWarning = new SavedBool("ShowEditorWarning", "VehicleEffectsMod", true, true);
         private SavedBool ignoreModVehicleParseErrors = new SavedBool("ShowModMissingVehicleErrors", "VehicleEffectsMod", true, true);
 
@@ -75,6 +77,10 @@ namespace VehicleEffects
                 showParseErrors.value = c;
             });
 #if DEBUG
+            group.AddCheckbox("Enable editor", enableEditor.value, (bool c) => {
+                enableEditor.value = c;
+            });
+
             group.AddCheckbox("Display editor warning", showEditorWarning.value, (bool c) => {
                 showEditorWarning.value = c;
             });
@@ -118,11 +124,14 @@ namespace VehicleEffects
                 // Editor
                 if(mode == LoadMode.LoadAsset || mode == LoadMode.NewAsset)
                 {
-                    UIView view = UIView.GetAView();
-                    uiGameObject = new GameObject();
-                    uiGameObject.transform.SetParent(view.transform);
-                    uiGameObject.AddComponent<Editor.UIMainPanel>().SetEditorWarning(showEditorWarning);
-                    uiGameObject.AddComponent<Editor.PrefabWatcher>();
+                    if(enableEditor)
+                    {
+                        UIView view = UIView.GetAView();
+                        uiGameObject = new GameObject();
+                        uiGameObject.transform.SetParent(view.transform);
+                        uiGameObject.AddComponent<Editor.UIMainPanel>().SetEditorWarning(showEditorWarning);
+                        uiGameObject.AddComponent<Editor.PrefabWatcher>();
+                    }
                 }
 #endif
                 return;
@@ -234,7 +243,7 @@ namespace VehicleEffects
                 {
                     if(current.isEnabled)
                     {
-                        var vehicleEffectsDefPath = Path.Combine(current.modPath, "VehicleEffectsDefinition.xml");
+                        var vehicleEffectsDefPath = Path.Combine(current.modPath, filename);
 
                         // skip files which were already parsed
                         if(checkedPaths.Contains(vehicleEffectsDefPath)) continue;
@@ -281,7 +290,7 @@ namespace VehicleEffects
                     if(crpPath == null) continue;
 
                     var vehicleEffectsDefPath = Path.Combine(Path.GetDirectoryName(crpPath) ?? "",
-                        "VehicleEffectsDefinition.xml");
+                        filename);
 
                     // skip files which were already parsed
                     if(checkedPaths.Contains(vehicleEffectsDefPath)) continue;
@@ -350,8 +359,9 @@ namespace VehicleEffects
         /// <param name="packageName">Package name used in error messages.</param>
         /// <param name="backup">Used to store original effect array.</param>
         /// <param name="parseErrors">HashSet to add parse errors to.</param>
-        /// <param name="noParseErrors">If true no vehicle related parse errors are given.</param>
-        public static void ParseVehicleDefinition(VehicleEffectsDefinition.Vehicle vehicleDef, string packageName, ref Dictionary<VehicleInfo, VehicleInfo.Effect[]> backup, ref HashSet<string> parseErrors, bool noParseErrors = false)
+        /// <param name="noParseErrors">Optional: If true no vehicle related parse errors are given.</param>
+        /// <param name="vehicleDefPrefab">Optional: VehicleInfo to apply definition to.</param>
+        public static void ParseVehicleDefinition(VehicleEffectsDefinition.Vehicle vehicleDef, string packageName, ref Dictionary<VehicleInfo, VehicleInfo.Effect[]> backup, ref HashSet<string> parseErrors, bool noParseErrors = false, VehicleInfo vehicleDefPrefab = null)
         {
             if(vehicleDef?.Name == null)
             {
@@ -359,7 +369,11 @@ namespace VehicleEffects
                 return;
             }
 
-            var vehicleDefPrefab = FindVehicle(vehicleDef.Name, packageName);
+            if(vehicleDefPrefab == null)
+            {
+                vehicleDefPrefab = FindVehicle(vehicleDef.Name, packageName);
+            }
+            
 
             if(vehicleDefPrefab == null)
             {
@@ -376,18 +390,21 @@ namespace VehicleEffects
 
             if(vehicleDef.ApplyToTrailersOnly)
             {
-                List<string> trailerNames = new List<string>();
+                HashSet<VehicleInfo> trailers = new HashSet<VehicleInfo>();
                 foreach(var trailer in vehicleDefPrefab.m_trailers)
                 {
-                    trailerNames.Add(trailer.m_info.name);
+                    if(!trailers.Contains(trailer.m_info))
+                    {
+                        trailers.Add(trailer.m_info);
+                    }
                 }
 
-                foreach(var trailerName in trailerNames)
+                foreach(var trailer in trailers)
                 {
                     var trailerDef = new VehicleEffectsDefinition.Vehicle();
-                    trailerDef.Name = trailerName;
+                    trailerDef.Name = trailer.name;
                     trailerDef.Effects = vehicleDef.Effects;
-                    ParseVehicleDefinition(trailerDef, packageName, ref backup, ref parseErrors, noParseErrors);
+                    ParseVehicleDefinition(trailerDef, packageName, ref backup, ref parseErrors, noParseErrors, trailer);
                 }
 
                 return;
@@ -602,7 +619,7 @@ namespace VehicleEffects
                 m_parkedFlagsForbidden = VehicleParked.Flags.Created,
                 m_parkedFlagsRequired = VehicleParked.Flags.None,
                 m_vehicleFlagsForbidden = (Vehicle.Flags)effectDef.ForbiddenFlags,
-                m_vehicleFlagsRequired = (Vehicle.Flags)effectDef.RequiredFlags
+                m_vehicleFlagsRequired = ((Vehicle.Flags)effectDef.RequiredFlags) | Vehicle.Flags.Created
             };
 
             if(effectDef.Replacment == null)

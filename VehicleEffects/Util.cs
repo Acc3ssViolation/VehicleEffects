@@ -7,6 +7,33 @@ namespace VehicleEffects
 {
     public class Util
     {
+        /// <summary>
+        /// Takes a full asset name and returns only the asset name.
+        /// </summary>
+        public static string GetAssetNameWithoutPackage(string name)
+        {
+            int num = name.IndexOf(".");
+            if(num > -1)
+            {
+                //string b = name.Substring(0, num);
+                return name.Substring(num + 1);
+            }
+            return name;
+        }
+
+        /// <summary>
+        /// Takes a full asset name and returns the embedded package name. Returns name if package name can't be found.
+        /// </summary>
+        public static string GetPackageName(string name)
+        {
+            int num = name.IndexOf(".");
+            if(num > -1)
+            {
+                return name.Substring(0, num);
+            }
+            return name;
+        }
+
         public static float SpeedKmHToInternal(float kmh)
         {
             return kmh * 0.16f;

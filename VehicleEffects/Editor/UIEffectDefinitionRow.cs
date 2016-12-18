@@ -8,11 +8,11 @@ using UnityEngine;
 
 namespace VehicleEffects.Editor
 {
-    public class UIVehicleEffectRow : UIPanel, IUIFastListRow
+    public class UIEffectDefinitionRow : UIPanel, IUIFastListRow
     {
         public struct EffectData
         {
-            public VehicleInfo.Effect m_effect;
+            public VehicleEffectsDefinition.Effect m_effect;
             [DefaultValue(-1)]
             public int m_index;
             public bool m_showButtons;
@@ -50,10 +50,11 @@ namespace VehicleEffects.Editor
 
             width = parent.width;
             height = HEIGHT;
-            m_removeButton.relativePosition = new Vector3(width - 40, 5);
-
+            
             if(m_nameLabel == null)
                 CreateComponents();
+
+            m_removeButton.relativePosition = new Vector3(width - 40, 5);
         }
 
         public void Deselect(bool isRowOdd)
@@ -96,20 +97,16 @@ namespace VehicleEffects.Editor
 
             m_removeButton.isVisible = m_data.m_showButtons;
 
-            if(m_data.m_effect.m_effect == null)
+            if(m_data.m_effect == null)
             {
                 m_nameLabel.textColor = Color.red;
-                m_nameLabel.text = "ERROR: Missing effect!";
+                m_nameLabel.text = "ERROR: No effect!";
             }
             else
             {
                 m_nameLabel.textColor = Color.white;
-                m_nameLabel.text = m_data.m_effect.m_effect.name;
-                var le = m_data.m_effect.m_effect as LightEffect;
-                if(le != null && le.m_positionIndex >= 0)
-                {
-                    m_nameLabel.text += " (Light index " + le.m_positionIndex + ")";
-                }
+                string name = m_data.m_effect.Base ?? m_data.m_effect.Replacment ?? m_data.m_effect.Name;
+                m_nameLabel.text = name;
             }
             m_nameLabel.tooltip = m_nameLabel.text;
 

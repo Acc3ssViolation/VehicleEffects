@@ -8,18 +8,27 @@ using UnityEngine;
 
 namespace VehicleEffects.Editor
 {
-    public class UIAddEffectPanel : UIPanel
+    public class UIEffectListPanel : UIPanel
     {
         public const int WIDTH = 360;
         public const int HEIGHT = 500;
 
+        private UILabel m_label;
         private UIFastList m_effectList;
         private UITextField m_searchField;
         public UIEffectPanel m_mainPanel;
 
+        public delegate void OnEffectSelected(EffectInfo info);
+        private OnEffectSelected m_delegate;
+
+        public static UIEffectListPanel main { get; private set; }
+
         public override void Start()
         {
             base.Start();
+
+            if(main == null)
+                main = this;
 
             UIView view = UIView.GetAView();
             width = WIDTH;
@@ -36,11 +45,24 @@ namespace VehicleEffects.Editor
         }
 
 
+        public void Show(OnEffectSelected callback)
+        {
+            m_delegate = callback;
+            Show(true);
+        }
+
+        public new void Hide()
+        {
+            m_delegate = null;
+            base.Hide();
+        }
+
+
         private void CreateComponents()
         {
-            UILabel label = AddUIComponent<UILabel>();
-            label.text = "Select an effect to add";
-            label.relativePosition = new Vector3(WIDTH / 2 - label.width / 2, 10);
+            m_label = AddUIComponent<UILabel>();
+            m_label.text = "Select an effect";
+            m_label.relativePosition = new Vector3(WIDTH / 2 - m_label.width / 2, 10);
 
             // Drag handle
             UIDragHandle handle = AddUIComponent<UIDragHandle>();
@@ -51,7 +73,7 @@ namespace VehicleEffects.Editor
             handle.relativePosition = Vector3.zero;
 
             // Name field
-            label = AddUIComponent<UILabel>();
+            UILabel label = AddUIComponent<UILabel>();
             label.text = "Name:";
 
             m_searchField = UIUtils.CreateTextField(this);
@@ -68,11 +90,11 @@ namespace VehicleEffects.Editor
 
             // Buttons
             UIButton confirmButton = UIUtils.CreateButton(this);
-            confirmButton.text = "Add";
+            confirmButton.text = "Select";
             confirmButton.relativePosition = new Vector3(WIDTH / 2 - confirmButton.width - 10, HEIGHT - confirmButton.height - 10);
             confirmButton.eventClicked += (c, p) =>
             {
-                AddEffect();
+                SelectEffect();
             };
 
             UIButton cancelButton = UIUtils.CreateButton(this);
@@ -96,7 +118,7 @@ namespace VehicleEffects.Editor
         {
             m_effectList.rowsData.Clear();
             m_effectList.selectedIndex = -1;
-            var effects = m_mainPanel.GetEffects();
+            var effects = m_mainPanel.GetLoadedEffects();
             for(int i = 0; i < effects.Length; i++)
             {
                 if(effects[i] != null &&
@@ -111,14 +133,11 @@ namespace VehicleEffects.Editor
             m_effectList.selectedIndex = 0;
         }
 
-        private void AddEffect()
+        private void SelectEffect()
         {
             var selectedData = m_effectList.selectedItem;
-            if(selectedData != null)
-            {
-                m_mainPanel.AddEffect(((UIEffectRow.EffectData)selectedData).m_info);
-            }
-            isVisible = false;
+            m_delegate?.Invoke(((UIEffectRow.EffectData)selectedData).m_info);
+            Hide();
         }
     }
 }

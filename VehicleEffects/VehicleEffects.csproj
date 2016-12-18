@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="Editor\EffectPreviewer.cs" />
     <Compile Include="Editor\PrefabWatcher.cs" />
-    <Compile Include="Editor\UIAddEffectPanel.cs" />
+    <Compile Include="Editor\UIEffectListPanel.cs" />
     <Compile Include="Editor\UIEffectOptionsPanel.cs" />
     <Compile Include="Editor\UIEffectPanel.cs" />
     <Compile Include="Editor\UIEffectRow.cs" />
@@ -65,8 +65,10 @@
     <Compile Include="Editor\UIFlagsPanel.cs" />
     <Compile Include="Editor\UIFloatField.cs" />
     <Compile Include="Editor\UIMainPanel.cs" />
+    <Compile Include="Editor\UILoadDefPanel.cs" />
+    <Compile Include="Editor\UISaveDefPanel.cs" />
     <Compile Include="Editor\UIUtils.cs" />
-    <Compile Include="Editor\UIVehicleEffectRow.cs" />
+    <Compile Include="Editor\UIEffectDefinitionRow.cs" />
     <Compile Include="Effects\BlinkerLights.cs" />
     <Compile Include="Effects\CustomVehicleMultiEffect.cs" />
     <Compile Include="Effects\CustomVehicleEffect.cs" />

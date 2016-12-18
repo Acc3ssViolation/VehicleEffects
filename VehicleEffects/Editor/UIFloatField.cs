@@ -53,17 +53,34 @@ namespace VehicleEffects.Editor
             return field;
         }
 
-        public static void FloatFieldHandler(UITextField field, string value, ref float target)
+        public static float FloatFieldHandler(UITextField field, string value, ref float target)
         {
             float v;
             if(float.TryParse(value, out v))
             {
                 target = v;
                 field.color = Color.white;
+                return v;
             }
             else
             {
                 field.color = Color.red;
+                return target;
+            }
+        }
+
+        public static float FloatFieldHandler(UITextField field, string value, float def)
+        {
+            float v;
+            if(float.TryParse(value, out v))
+            {
+                field.color = Color.white;
+                return v;
+            }
+            else
+            {
+                field.color = Color.red;
+                return def;
             }
         }
     }

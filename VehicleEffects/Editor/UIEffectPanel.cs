@@ -13,22 +13,31 @@ namespace VehicleEffects.Editor
     /// </summary>
     public class UIEffectPanel : UIPanel
     {
-        public const int WIDTH = 750;
-        public const int HEIGHT = 500;
+        public const int WIDTH = 950;
+        public const int HEIGHT = 550;
+        private const string ALL_TRAILER_POSTFIX = " (All Trailers Only)";
 
         private bool m_wasVisible = false;
 
         private UIDropDown m_vehicleDropdown;
-        private UIAddEffectPanel m_addPanel;
+        private UIEffectListPanel m_effectListPanel;
+        private UISaveDefPanel m_savePanel;
+        private UILoadDefPanel m_loadPanel;
         private UIEffectOptionsPanel m_optionsPanel;
-        private UIFastList m_effectList;
+        private UIFastList m_veEffectList;
         private UIButton m_addEffectButton;
+        private UIButton m_saveDefinitionButton;
+        private UIButton m_loadDefinitionButton;
+        private UIButton m_previewButton;
 
         public UIFlagsPanel m_flagsPanel { get; private set; }
 
         private Dictionary<string, EffectInfo> m_effectDict = new Dictionary<string, EffectInfo>();
-        private VehicleInfo m_vehicle;
-        private VehicleInfo[] m_vehicles;
+        private string m_vehicle;
+        private string[] m_vehicles;
+        public VehicleEffectsDefinition m_definition;
+
+        private EffectPreviewer m_previewer;
 
         public static UIEffectPanel main { get; private set; }
 
@@ -45,7 +54,7 @@ namespace VehicleEffects.Editor
         {
             m_wasVisible = isVisible;
             isVisible = false;
-            m_addPanel.isVisible = false;
+            m_effectListPanel.isVisible = false;
         }
 
         public override void Start()
@@ -64,9 +73,17 @@ namespace VehicleEffects.Editor
             relativePosition = new Vector3(Mathf.FloorToInt((view.fixedWidth - width) / 2), Mathf.FloorToInt((view.fixedHeight - height) / 2));
 
             // Create add panel
-            m_addPanel = new GameObject().AddComponent<UIAddEffectPanel>();
-            m_addPanel.gameObject.transform.SetParent(transform.parent);
-            m_addPanel.m_mainPanel = this;
+            m_effectListPanel = new GameObject().AddComponent<UIEffectListPanel>();
+            m_effectListPanel.gameObject.transform.SetParent(transform.parent);
+            m_effectListPanel.m_mainPanel = this;
+
+            // Create save panel
+            m_savePanel = new GameObject().AddComponent<UISaveDefPanel>();
+            m_savePanel.gameObject.transform.SetParent(transform.parent);
+
+            // Create load panel
+            m_loadPanel = new GameObject().AddComponent<UILoadDefPanel>();
+            m_loadPanel.gameObject.transform.SetParent(transform.parent);
 
             // Create flags panel
             m_flagsPanel = new GameObject().AddComponent<UIFlagsPanel>();
@@ -86,74 +103,12 @@ namespace VehicleEffects.Editor
                 PrefabWatcher.instance.trailersChanged -= OnTrailersChanged;
             };
 
+            m_previewer = new EffectPreviewer();
+
             CompileEffectsList();
             CreateComponents();
         }
 
-        private void OnPrefabChanged()
-        {
-            UpdateVehicles();
-        }
-
-        private void OnTrailersChanged(string[] names)
-        {
-            UpdateVehicles();
-        }
-
-        private void UpdateVehicles()
-        {
-            ToolController properties = Singleton<ToolManager>.instance.m_properties;
-            if(properties != null)
-            {
-                var vehicleInfo = properties.m_editPrefabInfo as VehicleInfo;
-                if(vehicleInfo != null)
-                {
-                    Dictionary<string, VehicleInfo> vehicles = new Dictionary<string, VehicleInfo>();
-                    vehicles.Add(vehicleInfo.name, vehicleInfo);
-                    if(vehicleInfo.m_trailers != null)
-                    {
-                        for(int i = 0; i < vehicleInfo.m_trailers.Length; i++)
-                        {
-                            if(!vehicles.ContainsKey(vehicleInfo.m_trailers[i].m_info.name))
-                            {
-                                vehicles.Add(vehicleInfo.m_trailers[i].m_info.name, vehicleInfo.m_trailers[i].m_info);
-                            }
-                        }
-                    }
-                    m_vehicles = vehicles.Values.ToArray();
-
-                    // Update dropdown
-                    m_vehicleDropdown.selectedIndex = -1;
-                    var items = new string[m_vehicles.Length];
-                    for(int i = 0; i < m_vehicles.Length; i++)
-                    {
-                        items[i] = m_vehicles[i].name;
-                    }
-                    m_vehicleDropdown.items = items;
-
-                    for(int i = 0; i < m_vehicles.Length; i++)
-                    {
-                        if(m_vehicles[i] == m_vehicle)
-                        {
-                            m_vehicleDropdown.selectedIndex = i;
-                            break;
-                        }
-                    }
-
-                    if(m_vehicleDropdown.selectedIndex < 0)
-                        m_vehicleDropdown.selectedIndex = 0;
-                }
-            }
-        }
-
-        public override void OnDestroy()
-        {
-            base.OnDestroy();
-            if(m_addPanel != null)
-            {
-                GameObject.Destroy(m_addPanel.gameObject);
-            }
-        }
 
         private void CreateComponents()
         {
@@ -185,77 +140,322 @@ namespace VehicleEffects.Editor
 
             // Dropdown
             m_vehicleDropdown = UIUtils.CreateDropDown(this);
-            m_vehicleDropdown.width = 300;
+            m_vehicleDropdown.width = 400;
             m_vehicleDropdown.relativePosition = new Vector3(10, headerHeight + 10);
             m_vehicleDropdown.eventSelectedIndexChanged += OnDropdownIndexChanged;
             m_vehicleDropdown.selectedIndex = -1;
 
-            // Fastlist for effects
-            m_effectList = UIFastList.Create<UIVehicleEffectRow>(this);
-            m_effectList.backgroundSprite = "UnlockingPanel";
-            m_effectList.width = (WIDTH - 30) / 2;
-            m_effectList.height = HEIGHT - headerHeight - m_vehicleDropdown.height - 30 - 50;
-            m_effectList.relativePosition = new Vector3(10, headerHeight + 20 + m_vehicleDropdown.height);
-            m_effectList.canSelect = true;
-            m_effectList.eventSelectedIndexChanged += OnEffectSelectionChanged;
+            float listHeight = HEIGHT - headerHeight - m_vehicleDropdown.height - 30 - 50;
+            float listWidth = 300;
+            float padding = 10;
+            float optionsWidth = WIDTH - (listWidth - 3 * padding);
+            float listTop = headerHeight + 20 + m_vehicleDropdown.height;
+
+            // Fastlist for Vehicle Effects definitions
+            m_veEffectList = UIFastList.Create<UIEffectDefinitionRow>(this);
+            m_veEffectList.backgroundSprite = "UnlockingPanel";
+            m_veEffectList.width = listWidth;
+            m_veEffectList.height = listHeight;
+            m_veEffectList.relativePosition = new Vector3(padding, listTop);
+            m_veEffectList.canSelect = true;
+            m_veEffectList.eventSelectedIndexChanged += OnVEEffectSelectionChanged;
 
             // Create options panel
             m_optionsPanel = AddUIComponent<UIEffectOptionsPanel>();
-            m_optionsPanel.width = m_effectList.width;
-            m_optionsPanel.height = m_effectList.height;
-            m_optionsPanel.relativePosition = new Vector3(WIDTH / 2 + 5, headerHeight + 20 + m_vehicleDropdown.height);
+            m_optionsPanel.width = optionsWidth;
+            m_optionsPanel.height = listHeight;
+            m_optionsPanel.relativePosition = new Vector3(listWidth + padding * 2, listTop);
             m_optionsPanel.m_mainPanel = this;
             m_optionsPanel.CreateComponents();
+
+            float footerX = 10;
 
             // Button to add effects (footer)
             m_addEffectButton = UIUtils.CreateButton(this);
             m_addEffectButton.text = "Add effect";
             m_addEffectButton.width = 120;
-            m_addEffectButton.relativePosition = new Vector3(10, HEIGHT - 40);
+            m_addEffectButton.relativePosition = new Vector3(footerX, HEIGHT - 40);
             m_addEffectButton.eventClicked += (c, b) =>
             {
-                if(!m_addPanel.isVisible)
-                    m_addPanel.isVisible = true;
+                if(!m_effectListPanel.isVisible)
+                {
+                    m_effectListPanel.Show((info) => {
+                        VehicleEffectsDefinition.Effect effect = new VehicleEffectsDefinition.Effect();
+                        effect.Name = info.name;
+                        AddEffect(effect);
+                    });
+                }
+            };
+            footerX += m_addEffectButton.width + 10;
+
+            // Button to save definition (footer)
+            m_saveDefinitionButton = UIUtils.CreateButton(this);
+            m_saveDefinitionButton.text = "Save XML";
+            m_saveDefinitionButton.width = 120;
+            m_saveDefinitionButton.relativePosition = new Vector3(footerX, HEIGHT - 40);
+            m_saveDefinitionButton.eventClicked += (c, b) =>
+            {
+                if(!m_savePanel.isVisible)
+                {
+                    m_savePanel.Show(Util.GetPackageName(m_vehicles[0]), GetCleanedDefinition());
+                }
+            };
+            footerX += m_saveDefinitionButton.width + 10;
+
+            // Button to load definition (footer)
+            m_loadDefinitionButton = UIUtils.CreateButton(this);
+            m_loadDefinitionButton.text = "Load XML";
+            m_loadDefinitionButton.width = 120;
+            m_loadDefinitionButton.relativePosition = new Vector3(footerX, HEIGHT - 40);
+            m_loadDefinitionButton.eventClicked += (c, b) =>
+            {
+                if(!m_loadPanel.isVisible)
+                {
+                    m_loadPanel.Show((definition) => {
+                        if(definition != null)
+                        {
+                            m_definition = definition;
+                            AddMissingSceneVehicles();
+                            PopulateVEList();
+                        }
+                    });
+                }
+            };
+            footerX += m_loadDefinitionButton.width + 10;
+
+            // Button to preview definition (footer)
+            m_previewButton = UIUtils.CreateButton(this);
+            m_previewButton.text = "Enable Preview";
+            m_previewButton.width = 180;
+            m_previewButton.relativePosition = new Vector3(WIDTH - 10 - m_previewButton.width, HEIGHT - 40);
+            m_previewButton.eventClicked += (c, b) =>
+            {
+                if(m_previewer.IsPreviewing)
+                {
+                    m_previewButton.text = "Enable Preview";
+                    m_previewer.RevertPreview();
+                }
+                else
+                {
+                    if(m_previewer.ApplyPreview(GetCleanedDefinition(), "Vehicle Effects Previewer"))
+                    {
+                        m_previewButton.text = "Disable Preview";
+                    }
+                }
             };
         }
 
-        private void OnEffectSelectionChanged(UIComponent component, int value)
+        private void OnPrefabChanged()
+        {
+            UpdateVehicles();
+        }
+
+        private void OnTrailersChanged(string[] names)
+        {
+            UpdateVehicles();
+        }
+
+        private void UpdateVehicles()
+        {
+            ToolController properties = Singleton<ToolManager>.instance.m_properties;
+            if(properties != null)
+            {
+                var vehicleInfo = properties.m_editPrefabInfo as VehicleInfo;
+                if(vehicleInfo != null)
+                {
+                    HashSet<string> vehicles = new HashSet<string>();
+                    vehicles.Add(vehicleInfo.name);
+                    vehicles.Add(vehicleInfo.name + ALL_TRAILER_POSTFIX);
+
+
+                    if(vehicleInfo.m_trailers != null)
+                    {
+                        for(int i = 0; i < vehicleInfo.m_trailers.Length; i++)
+                        {
+                            if(!vehicles.Contains(vehicleInfo.m_trailers[i].m_info.name))
+                            {
+                                vehicles.Add(vehicleInfo.m_trailers[i].m_info.name);
+                            }
+                        }
+                    }
+                    m_vehicles = vehicles.ToArray();
+
+                    // Update dropdown
+                    m_vehicleDropdown.selectedIndex = -1;
+                    var items = new string[m_vehicles.Length];
+                    for(int i = 0; i < m_vehicles.Length; i++)
+                    {
+                        items[i] = m_vehicles[i];
+                    }
+                    m_vehicleDropdown.items = items;
+
+                    AddMissingSceneVehicles();
+
+                    for(int i = 0; i < m_vehicles.Length; i++)
+                    {
+                        if(m_vehicles[i] == m_vehicle)
+                        {
+                            m_vehicleDropdown.selectedIndex = i;
+                            break;
+                        }
+                    }
+
+                    if(m_vehicleDropdown.selectedIndex < 0)
+                        m_vehicleDropdown.selectedIndex = 0;
+                }
+            }
+        }
+
+        private void AddMissingSceneVehicles()
+        {
+            if(m_definition == null)
+            {
+                m_definition = new VehicleEffectsDefinition();
+            }
+
+            // Loop trough scene vehicles
+            for(int i = 0; i < m_vehicles.Length; i++)
+            {
+                if(FindVehicleDefinition(m_vehicles[i]) == null)
+                {
+                    var vehicleDef = new VehicleEffectsDefinition.Vehicle();
+                    Logging.Log("Adding definition for " + m_vehicles[i]);
+                    if(i == 1)
+                    {
+                        // Special case for global trailer option
+                        vehicleDef.Name = m_vehicles[0];
+                        vehicleDef.ApplyToTrailersOnly = true;
+                    }
+                    else
+                    {
+                        vehicleDef.Name = m_vehicles[i];
+                    }
+                    m_definition.Vehicles.Add(vehicleDef);
+                }
+            }
+        }
+
+        private VehicleEffectsDefinition.Vehicle FindVehicleDefinition(string name)
+        {
+            if(m_definition != null)
+            {
+                bool trailersOnly = false;
+                if(name.Contains(ALL_TRAILER_POSTFIX))
+                {
+                    trailersOnly = true;
+                    name = name.Substring(0, name.Length - ALL_TRAILER_POSTFIX.Length);
+                }
+                foreach(var vehicleDef in m_definition.Vehicles)
+                {
+                    if(vehicleDef.Name == name && vehicleDef.ApplyToTrailersOnly == trailersOnly)
+                        return vehicleDef;
+                }
+            }
+            return null;
+        }
+
+        private VehicleEffectsDefinition GetCleanedDefinition()
+        {
+            if(m_definition == null)
+            {
+                m_definition = new VehicleEffectsDefinition();
+            }
+
+            var cleanedDef = m_definition.Copy();
+
+            for(int i = cleanedDef.Vehicles.Count - 1; i >= 0; i--)
+            {
+                Logging.LogWarning(i + " " + cleanedDef.Vehicles[i]);
+                string name = cleanedDef.Vehicles[i].ApplyToTrailersOnly ? cleanedDef.Vehicles[i].Name + ALL_TRAILER_POSTFIX : cleanedDef.Vehicles[i].Name;
+                bool inScene = false;
+                foreach(var vehicle in m_vehicles)
+                {
+                    if(name == vehicle)
+                    {
+                        inScene = true;
+                        break;
+                    }
+                }
+                if(!inScene || cleanedDef.Vehicles[i].Effects.Count < 1)
+                {
+                    Logging.Log("Removing definition for " + cleanedDef.Vehicles[i].Name + "\nInScene: " + inScene.ToString());
+                    cleanedDef.Vehicles.RemoveAt(i);
+                }
+            }
+
+            return cleanedDef;
+        }
+
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            if(m_effectListPanel != null)
+            {
+                GameObject.Destroy(m_effectListPanel.gameObject);
+            }
+            if(m_savePanel != null)
+            {
+                GameObject.Destroy(m_savePanel.gameObject);
+            }
+            if(m_loadPanel != null)
+            {
+                GameObject.Destroy(m_loadPanel.gameObject);
+            }
+            if(m_flagsPanel != null)
+            {
+                GameObject.Destroy(m_flagsPanel.gameObject);
+            }
+        }
+
+        private void OnVEEffectSelectionChanged(UIComponent component, int value)
         {
             if(m_optionsPanel != null)
             {
-                if(value < 0 || m_vehicle == null || m_vehicle.m_effects == null || value < 0 || value >= m_vehicle.m_effects.Length)
+                if(value < 0)
                 {
-                    m_optionsPanel.isVisible = false;
+                    m_optionsPanel.Hide();
                     return;
                 }
 
                 m_optionsPanel.isVisible = true;
-                m_optionsPanel.Display(m_vehicle.m_effects[value], value);
+                m_optionsPanel.m_allowEditing = true;
+                m_optionsPanel.Display(FindVehicleDefinition(m_vehicle).Effects[value]);
             }
         }
 
         private void OnDropdownIndexChanged(UIComponent component, int value)
         {
             if(value < 0)
-                return;
-
-            m_vehicle = m_vehicles[value];
-            PopulateList();
-        }
-
-        private void PopulateList()
-        {
-            m_effectList.rowsData.Clear();
-            m_effectList.selectedIndex = -1;
-            var effects = m_vehicle.m_effects;
-            for(int i = 0; i < effects.Length; i++)
             {
-                m_effectList.rowsData.Add(new UIVehicleEffectRow.EffectData { m_effect = effects[i], m_showButtons = true, m_index = i });
+                m_optionsPanel.Hide();
+                return;
             }
 
-            m_effectList.rowHeight = UIVehicleEffectRow.HEIGHT;
-            m_effectList.DisplayAt(0);
-            m_effectList.selectedIndex = 0;
+            m_vehicleDropdown.tooltip = m_vehicleDropdown.items[value];
+            m_vehicle = m_vehicles[value];
+            PopulateVEList();
+        }
+
+        private void PopulateVEList()
+        {
+            m_veEffectList.rowsData.Clear();
+            m_veEffectList.selectedIndex = -1;
+            var effects = FindVehicleDefinition(m_vehicle).Effects;
+            for(int i = 0; i < effects.Count; i++)
+            {
+                m_veEffectList.rowsData.Add(new UIEffectDefinitionRow.EffectData { m_effect = effects[i], m_showButtons = true, m_index = i });
+            }
+
+            m_veEffectList.rowHeight = UIEffectDefinitionRow.HEIGHT;
+            m_veEffectList.DisplayAt(0);
+            if(effects.Count > 0)
+            {
+                m_veEffectList.selectedIndex = 0;
+            }
+            else
+            {
+                m_optionsPanel.Hide();
+            }
         }
 
         private void CompileEffectsList()
@@ -268,40 +468,16 @@ namespace VehicleEffects.Editor
             }
         }
 
-        public void AddEffect(EffectInfo effect)
-        {
-            AddEffect(new VehicleInfo.Effect
-            {
-                m_effect = effect,
-                m_parkedFlagsForbidden = VehicleParked.Flags.Created,
-                m_parkedFlagsRequired = VehicleParked.Flags.None,
-                m_vehicleFlagsForbidden = 0,
-                m_vehicleFlagsRequired = Vehicle.Flags.Created | Vehicle.Flags.Spawned
-            });
-        }
-
-        public void AddEffect(VehicleInfo.Effect effectData)
+        public void AddEffect(VehicleEffectsDefinition.Effect effectDef)
         {
             if(m_vehicle != null)
             {
-                var array = new VehicleInfo.Effect[m_vehicle.m_effects.Length + 1];
-                m_vehicle.m_effects.CopyTo(array, 0);
-                array[m_vehicle.m_effects.Length] = effectData;
-                m_vehicle.m_effects = array;
-                PopulateList();
-                m_effectList.DisplayAt(m_vehicle.m_effects.Length - 1);
-                m_effectList.selectedIndex = m_vehicle.m_effects.Length - 1;
-            }
-        }
-
-        public void ChangeEffect(VehicleInfo.Effect data, int index)
-        {
-            if(m_vehicle != null)
-            {
-                if(m_vehicle.m_effects == null || index < 0 || index >= m_vehicle.m_effects.Length)
-                    return;
-
-                m_vehicle.m_effects[index] = data;
+                VehicleEffectsDefinition.Vehicle vehicle = FindVehicleDefinition(m_vehicle);
+                if(vehicle != null)
+                {
+                    vehicle.Effects.Add(effectDef);
+                    PopulateVEList();
+                }
             }
         }
        
@@ -309,26 +485,16 @@ namespace VehicleEffects.Editor
         {
             if(m_vehicle != null)
             {
-                if(m_vehicle.m_effects == null || index < 0 || index >= m_vehicle.m_effects.Length)
-                    return;
-
-                /*ConfirmPanel.ShowModal(Mod.name, "Are you sure you want to remove the effect?", delegate (UIComponent comp, int ret)
+                VehicleEffectsDefinition.Vehicle vehicle = FindVehicleDefinition(m_vehicle);
+                if(vehicle != null)
                 {
-                    if(ret == 1)
-                    {
-                        
-                    }
-                });*/
-
-                List<VehicleInfo.Effect> list = new List<VehicleInfo.Effect>();
-                list.AddRange(m_vehicle.m_effects);
-                list.RemoveAt(index);
-                m_vehicle.m_effects = list.ToArray();
-                PopulateList();
+                    vehicle.Effects.RemoveAt(index);
+                    PopulateVEList();
+                }
             }
         }
 
-        public EffectInfo[] GetEffects()
+        public EffectInfo[] GetLoadedEffects()
         {
             var effectArray = new EffectInfo[m_effectDict.Count];
             m_effectDict.Values.CopyTo(effectArray, 0);

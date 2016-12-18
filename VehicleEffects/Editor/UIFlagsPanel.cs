@@ -21,6 +21,7 @@ namespace VehicleEffects.Editor
         private UILabel m_label;
         private UIPanel m_flagsPanel;
         private UIPanel m_parkedFlagsPanel;
+        private UIButton m_confirmButton;
 
         public delegate void OnFlagsSet(Vehicle.Flags flags);
         public delegate void OnParkedFlagsSet(VehicleParked.Flags flags);
@@ -45,7 +46,7 @@ namespace VehicleEffects.Editor
             CreateComponents();
         }
 
-        public void Show(string title, Vehicle.Flags checkedFlags, OnFlagsSet callback)
+        public void Show(string title, Vehicle.Flags checkedFlags, OnFlagsSet callback, bool allowEdit = true)
         {
             m_callback1 = callback;
             m_callback2 = null;
@@ -59,20 +60,20 @@ namespace VehicleEffects.Editor
             {
                 if((checkedFlags & flags[i]) > 0)
                 {
-                    Logging.Log("True");
                     m_flagBoxDict[flags[i]].isChecked = true;
                 }
                 else
                 {
-                    Logging.Log("False");
                     m_flagBoxDict[flags[i]].isChecked = false;
                 }
             }
-            
-            isVisible = true;
+
+            Show(true);
+            m_confirmButton.isEnabled = allowEdit;
+            m_label.relativePosition = new Vector3(WIDTH / 2 - m_label.width / 2, 10);
         }
 
-        public void Show(string title, VehicleParked.Flags checkedFlags, OnParkedFlagsSet callback)
+        public void Show(string title, VehicleParked.Flags checkedFlags, OnParkedFlagsSet callback, bool allowEdit = true)
         {
             m_callback1 = null;
             m_callback2 = callback;
@@ -93,8 +94,8 @@ namespace VehicleEffects.Editor
                     m_flagBoxDictAlt[flags[i]].isChecked = false;
                 }
             }
-
-            isVisible = true;
+            Show(true);
+            m_confirmButton.isEnabled = allowEdit;
             m_label.relativePosition = new Vector3(WIDTH / 2 - m_label.width / 2, 10);
         }
 
@@ -116,10 +117,10 @@ namespace VehicleEffects.Editor
             m_parkedFlagsPanel = CreateFlagCheckboxes(new Vector3(10, handle.height + 10), 250, HEIGHT - 100, m_boxFlagDictAlt, m_flagBoxDictAlt);
 
             // Buttons
-            UIButton confirmButton = UIUtils.CreateButton(this);
-            confirmButton.text = "Done";
-            confirmButton.relativePosition = new Vector3(WIDTH / 2 - confirmButton.width - 10, HEIGHT - confirmButton.height - 10);
-            confirmButton.eventClicked += (c, p) =>
+            m_confirmButton = UIUtils.CreateButton(this);
+            m_confirmButton.text = "Done";
+            m_confirmButton.relativePosition = new Vector3(WIDTH / 2 - m_confirmButton.width - 10, HEIGHT - m_confirmButton.height - 10);
+            m_confirmButton.eventClicked += (c, p) =>
             {
                 Done();
             };
@@ -145,7 +146,6 @@ namespace VehicleEffects.Editor
                         flags |= v.Value;
                     }
                 }
-                Logging.LogWarning(flags.ToString());
                 m_callback1.Invoke(flags);
             }
             else if(m_callback2 != null)
@@ -158,7 +158,6 @@ namespace VehicleEffects.Editor
                         flags |= v.Value;
                     }
                 }
-                Logging.LogWarning(flags.ToString());
                 m_callback2.Invoke(flags);
             }
             isVisible = false;

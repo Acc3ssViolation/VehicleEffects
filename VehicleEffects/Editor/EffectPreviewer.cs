@@ -20,30 +20,66 @@ namespace VehicleEffects.Editor
             }
         }
 
-        public void ApplyPreview(VehicleEffectsDefinition definition, string packageName)
+        public bool ApplyPreview(VehicleEffectsDefinition definition, string packageName)
         {
             RevertPreview();
 
             m_parseErrors = new HashSet<string>();
 
-            if(definition?.Vehicles == null || definition.Vehicles.Count == 0)
+            VehicleInfo vehicleInfo = ToolsModifierControl.toolController.m_editPrefabInfo as VehicleInfo;
+            if(vehicleInfo != null)
             {
-                m_parseErrors.Add("Previewer - vehicleEffectDef is null or empty.");
+                Dictionary<string, VehicleInfo> infoDict = new Dictionary<string, VehicleInfo>();
+                infoDict.Add(vehicleInfo.name, vehicleInfo);
+
+                if(vehicleInfo.m_trailers != null)
+                {
+                    foreach(var trailer in vehicleInfo.m_trailers)
+                    {
+                        if(!infoDict.ContainsKey(trailer.m_info.name))
+                        {
+                            infoDict.Add(trailer.m_info.name, trailer.m_info);
+                        }
+                    }
+                }
+
+
+                if(definition?.Vehicles == null || definition.Vehicles.Count == 0)
+                {
+                    m_parseErrors.Add("Previewer - vehicleEffectDef is null or empty.");
+                }
+                else
+                {
+                    m_isApplied = true;
+                    foreach(var vehicleDef in definition.Vehicles)
+                    {
+                        VehicleInfo info;
+                        if(infoDict.TryGetValue(vehicleDef.Name, out info))
+                        {
+                            VehicleEffectsMod.ParseVehicleDefinition(vehicleDef, packageName, ref m_changes, ref m_parseErrors, false, info);
+                        }
+                        else
+                        {
+                            m_parseErrors.Add("Prefab for " + vehicleDef.Name + " not found!");
+                            m_parseErrors.Add(infoDict.Keys.Aggregate("List of prefabs:\n", (current, error) => current + error + "\n"));
+                        }
+                    }
+                }
             }
             else
             {
-                m_isApplied = true;
-                foreach(var vehicleDef in definition.Vehicles)
-                {
-                    VehicleEffectsMod.ParseVehicleDefinition(vehicleDef, packageName, ref m_changes, ref m_parseErrors);
-                }
+                m_parseErrors.Add("No prefab found.");
             }
+
+            
 
             if(m_parseErrors?.Count > 0)
             {
                 var errorMessage = m_parseErrors.Aggregate("Error while parsing vehicle effect definition preview.\n" + "List of errors:\n", (current, error) => current + (error + '\n'));
                 UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Vehicle Effects", errorMessage, false);
             }
+
+            return m_isApplied;
         }
 
         public void RevertPreview()
