@@ -76,7 +76,7 @@ namespace VehicleEffects
             group.AddCheckbox("Display error messages", showParseErrors.value, (bool c) => {
                 showParseErrors.value = c;
             });
-#if DEBUG
+
             group.AddCheckbox("Enable editor", enableEditor.value, (bool c) => {
                 enableEditor.value = c;
             });
@@ -84,7 +84,7 @@ namespace VehicleEffects
             group.AddCheckbox("Display editor warning", showEditorWarning.value, (bool c) => {
                 showEditorWarning.value = c;
             });
-#endif
+
             group.AddCheckbox("No missing vehicles errors when parsing definitions included in mods", ignoreModVehicleParseErrors.value, (bool c) => {
                 ignoreModVehicleParseErrors.value = c;
             });
@@ -120,7 +120,6 @@ namespace VehicleEffects
 
             if(mode != LoadMode.LoadGame && mode != LoadMode.NewGame)
             {
-#if DEBUG
                 // Editor
                 if(mode == LoadMode.LoadAsset || mode == LoadMode.NewAsset)
                 {
@@ -133,7 +132,6 @@ namespace VehicleEffects
                         uiGameObject.AddComponent<Editor.PrefabWatcher>();
                     }
                 }
-#endif
                 return;
             }
 

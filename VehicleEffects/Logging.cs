@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace VehicleEffects
 {
+    /// <summary>
+    /// Wrapper for UnityEngine.Debug.Log* methods that adds a prefix to the output for easy debugging
+    /// </summary>
     public static class Logging
     {
         private const string LOG_PREFIX = "Vehicle Effects";

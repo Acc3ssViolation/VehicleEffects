@@ -29,6 +29,7 @@ namespace VehicleEffects.Editor
             VehicleInfo vehicleInfo = ToolsModifierControl.toolController.m_editPrefabInfo as VehicleInfo;
             if(vehicleInfo != null)
             {
+                // Find the VehicleInfo's currently in the scene and store them in a dictionary
                 Dictionary<string, VehicleInfo> infoDict = new Dictionary<string, VehicleInfo>();
                 infoDict.Add(vehicleInfo.name, vehicleInfo);
 
@@ -53,6 +54,7 @@ namespace VehicleEffects.Editor
                     m_isApplied = true;
                     foreach(var vehicleDef in definition.Vehicles)
                     {
+                        // Check if the vehicle of this definition is in the scene and if so, apply it
                         VehicleInfo info;
                         if(infoDict.TryGetValue(vehicleDef.Name, out info))
                         {
@@ -86,6 +88,7 @@ namespace VehicleEffects.Editor
         {
             if(m_isApplied)
             {
+                // Restore old effect arrays
                 foreach(var change in m_changes)
                 {
                     change.Key.m_effects = change.Value;
