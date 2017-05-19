@@ -2,11 +2,40 @@
 using UnityEngine;
 using System.IO;
 using System.Reflection;
+using ColossalFramework.Plugins;
 
 namespace VehicleEffects
 {
     public class Util
     {
+        public static GameObject LoadGameObjectFromAssetBundle(string bundle, string asset)
+        {
+            Assembly asm = Assembly.GetAssembly(typeof(VehicleEffectsMod));
+            var pluginInfo = PluginManager.instance.FindPluginInfo(asm);
+
+            GameObject obj = null;
+
+            try
+            {
+                string absUri = "file:///" + pluginInfo.modPath.Replace("\\", "/") + "/AssetBundles/" + bundle;
+                WWW www = new WWW(absUri);
+                AssetBundle assetBundle = www.assetBundle;
+
+
+                Logging.Log("Bundle loading " + ((assetBundle == null) ? "failed " + www.error : "succeeded"));
+                UnityEngine.Object a = assetBundle.LoadAsset(asset);
+                Logging.Log("Asset unpacking " + ((a == null) ? "failed " : "succeeded"));
+                obj = GameObject.Instantiate(a) as GameObject;
+                assetBundle.Unload(false);
+            }
+            catch(Exception e)
+            {
+                Logging.Log("Exception trying to load bundle file!" + e.ToString());
+            }
+
+            return obj;
+        }
+
         /// <summary>
         /// Takes a full asset name and returns only the asset name.
         /// </summary>

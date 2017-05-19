@@ -22,10 +22,10 @@ namespace VehicleEffects
         public const string filename = "VehicleEffectsDefinition.xml";
 
         private HashSet<string> vehicleEffectsDefParseErrors;
-        private SavedBool showParseErrors = new SavedBool("ShowParseErrors", "VehicleEffectsMod", true, true);
-        private SavedBool enableEditor = new SavedBool("EnableEditor", "VehicleEffectsMod", true, true);
-        private SavedBool showEditorWarning = new SavedBool("ShowEditorWarning", "VehicleEffectsMod", true, true);
-        private SavedBool ignoreModVehicleParseErrors = new SavedBool("ShowModMissingVehicleErrors", "VehicleEffectsMod", true, true);
+        private SavedBool showParseErrors;
+        private SavedBool enableEditor;
+        private SavedBool showEditorWarning;
+        private SavedBool ignoreModVehicleParseErrors;
 
         private GameObject gameObject;
         private GameObject uiGameObject;
@@ -68,6 +68,11 @@ namespace VehicleEffects
                     }
                 });
             }
+
+            showParseErrors = new SavedBool("ShowParseErrors", "VehicleEffectsMod", true, true);
+            enableEditor = new SavedBool("EnableEditor", "VehicleEffectsMod", true, true);
+            showEditorWarning = new SavedBool("ShowEditorWarning", "VehicleEffectsMod", true, true);
+            ignoreModVehicleParseErrors = new SavedBool("ShowModMissingVehicleErrors", "VehicleEffectsMod", true, true);
         }
 
         public void OnSettingsUI(UIHelperBase helper)
@@ -190,7 +195,8 @@ namespace VehicleEffects
             TrainBell.CreateEffectObject(t);
 
             // Planes
-            PropAircraftMovement.CreateEffectObject(t);
+            //PropAircraftMovement.CreateEffectObject(t);
+            //PropellerEffectManager.CreateEffectObject(t);
 
             // Custom lights
             TrainDitchLight.CreateEffectObject(t);

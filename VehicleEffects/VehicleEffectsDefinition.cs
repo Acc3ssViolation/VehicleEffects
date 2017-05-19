@@ -98,7 +98,8 @@ namespace VehicleEffects
                 RequiredFlags = Flags.Created;
             }
 
-            // Exact copy of Vehicle.Flags needed due to namespace problems with Vehicle and Vehicle...
+            // Exact copy of Vehicle.Flags needed due to namespace problems with C:S's Vehicle
+            // Make sure that this is kept up to date as the game gets updates!
             [Flags]
             public enum Flags
             {
