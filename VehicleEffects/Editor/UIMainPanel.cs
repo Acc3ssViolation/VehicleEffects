@@ -47,7 +47,7 @@ namespace VehicleEffects.Editor
             m_toggleButton.text = "Vehicle Effects";
             m_toggleButton.width = 120;
             m_toggleButton.tooltip = "Opens the Vehicle Effects editor";
-            m_toggleButton.relativePosition = new Vector3(Mathf.Floor(view.fixedWidth - m_toggleButton.width - 90), Mathf.Floor(view.fixedHeight - m_toggleButton.height - 8));
+            m_toggleButton.relativePosition = new Vector3(10, 10);
             m_toggleButton.eventClicked += (c, b) =>
             {
                 if(m_showWarning)

@@ -18,7 +18,7 @@ namespace VehicleEffects
     public class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.5";
+        public const string version = "1.5a";
         public const string filename = "VehicleEffectsDefinition.xml";
 
         private HashSet<string> vehicleEffectsDefParseErrors;
@@ -141,9 +141,6 @@ namespace VehicleEffects
             }
 
             UpdateVehicleEffects();
-
-            reloadBehaviour = gameObject.AddComponent<ReloadEffectsBehaviour>();
-            reloadBehaviour.SetMod(this);
         }
 
         public override void OnLevelUnloading()
@@ -168,6 +165,8 @@ namespace VehicleEffects
                 gameObject = new GameObject("Vehicle Effects Mod");
                 UnityEngine.Object.DontDestroyOnLoad(gameObject);
                 CreateCustomEffects();
+                reloadBehaviour = gameObject.AddComponent<ReloadEffectsBehaviour>();
+                reloadBehaviour.SetMod(this);
             }
             Logging.Log("Done initializing Game Objects");
         }
