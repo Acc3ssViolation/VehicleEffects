@@ -18,7 +18,7 @@ namespace VehicleEffects
     public class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.5a";
+        public const string version = "1.6";
         public const string filename = "VehicleEffectsDefinition.xml";
 
         private HashSet<string> vehicleEffectsDefParseErrors;
