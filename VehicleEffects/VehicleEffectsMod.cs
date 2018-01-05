@@ -15,13 +15,11 @@ using ColossalFramework;
 
 namespace VehicleEffects
 {
-    public class VehicleEffectsMod : LoadingExtensionBase, IUserMod
+    public partial class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.6";
-        public const string filename = "VehicleEffectsDefinition.xml";
+        public const string version = "1.7";
 
-        private HashSet<string> vehicleEffectsDefParseErrors;
         private SavedBool showParseErrors;
         private SavedBool enableEditor;
         private SavedBool showEditorWarning;
@@ -30,21 +28,21 @@ namespace VehicleEffects
         private GameObject gameObject;
         private GameObject uiGameObject;
 
-        private List<VehicleEffectsDefinition.Vehicle> effectPlacementRequests;
         private Dictionary<VehicleInfo, VehicleInfo.Effect[]> changes = new Dictionary<VehicleInfo, VehicleInfo.Effect[]>();
         private bool hasChangedPrefabs;
         private List<SoundEffectOptions> soundEffectOptions;
         private ReloadEffectsBehaviour reloadBehaviour;
 
-        public delegate void OnVehicleUpdate();
-        public static event OnVehicleUpdate eventVehicleUpdateStart;
-        public static event OnVehicleUpdate eventVehicleUpdateFinished;
+        private List<ConfigLoader> configLoaders = new List<ConfigLoader>();
+        private List<VehicleEffectsDefinition> loadedDefinitions = new List<VehicleEffectsDefinition>();
+        private Dictionary<VehicleEffectsDefinition, string> definitionPackages = new Dictionary<VehicleEffectsDefinition, string>();
+        private HashSet<string> vehicleEffectsDefParseErrors = new HashSet<string>();
 
         public string Description
         {
             get
             {
-                return "Allows extra effects to be added to vehicles. Updated for 1.6";
+                return "Allows extra effects to be added to vehicles. Updated for Green Cities";
             }
         }
 
@@ -73,6 +71,9 @@ namespace VehicleEffects
             enableEditor = new SavedBool("EnableEditor", "VehicleEffectsMod", true, true);
             showEditorWarning = new SavedBool("ShowEditorWarning", "VehicleEffectsMod", true, true);
             ignoreModVehicleParseErrors = new SavedBool("ShowModMissingVehicleErrors", "VehicleEffectsMod", true, true);
+
+            configLoaders.Add(new VehicleEffectsLoader(loadedDefinitions, definitionPackages, vehicleEffectsDefParseErrors));
+            configLoaders.Add(new SoundEffectsLoader(vehicleEffectsDefParseErrors));
         }
 
         public void OnSettingsUI(UIHelperBase helper)
@@ -229,53 +230,30 @@ namespace VehicleEffects
 
         private void UpdateVehicleEffects()
         {
-            eventVehicleUpdateStart?.Invoke();
-
+            OnVehicleUpdateStart();
             try
             {
-                effectPlacementRequests = new List<VehicleEffectsDefinition.Vehicle>();
-                vehicleEffectsDefParseErrors = new HashSet<string>();
-                var lockedVehicles = new HashSet<VehicleInfo>();
                 var checkedPaths = new List<string>();
 
-                var loadedDefinitions = new List<VehicleEffectsDefinition>();
-                var definitionPackages = new Dictionary<VehicleEffectsDefinition, string>();
+                foreach(var loader in configLoaders)
+                {
+                    loader.Prepare();
+                }
 
                 // Load definitions from mod folders
                 foreach(var current in ColossalFramework.Plugins.PluginManager.instance.GetPluginsInfo())
                 {
                     if(current.isEnabled)
                     {
-                        var vehicleEffectsDefPath = Path.Combine(current.modPath, filename);
-
-                        // skip files which were already parsed
-                        if(checkedPaths.Contains(vehicleEffectsDefPath)) continue;
-                        checkedPaths.Add(vehicleEffectsDefPath);
-
-                        if(!File.Exists(vehicleEffectsDefPath)) continue;
-
-                        VehicleEffectsDefinition vehicleEffectsDef = null;
-
-                        var xmlSerializer = new XmlSerializer(typeof(VehicleEffectsDefinition));
-                        try
+                        foreach(var loader in configLoaders)
                         {
-                            using(var streamReader = new System.IO.StreamReader(vehicleEffectsDefPath))
-                            {
-                                vehicleEffectsDef = xmlSerializer.Deserialize(streamReader) as VehicleEffectsDefinition;
-                            }
+                            var path = Path.Combine(current.modPath, loader.FileName);
+                            // skip files which were already parsed
+                            if(checkedPaths.Contains(path)) continue;
+                            checkedPaths.Add(path);
+                            if(!File.Exists(path)) continue;
+                            loader.OnFileFound(path, current.name, true);
                         }
-                        catch(Exception e)
-                        {
-                            Logging.LogException(e);
-                            vehicleEffectsDefParseErrors.Add(current.name + " - " + e.Message);
-                            continue;
-                        }
-
-                        Logging.Log("Loading definition from Mod " + current.name);
-
-                        vehicleEffectsDef.LoadedFromMod = true;
-                        loadedDefinitions.Add(vehicleEffectsDef);
-                        definitionPackages.Add(vehicleEffectsDef, current.name);
                     }                    
                 }
 
@@ -284,42 +262,23 @@ namespace VehicleEffects
                 {
                     var prefab = PrefabCollection<VehicleInfo>.GetLoaded(i);
 
+                    // Check if asset is valid
                     if(prefab == null) continue;
 
-                    // search for VehicleEffectsDefinition.xml
                     var asset = PackageManager.FindAssetByName(prefab.name);
 
                     var crpPath = asset?.package?.packagePath;
                     if(crpPath == null) continue;
 
-                    var vehicleEffectsDefPath = Path.Combine(Path.GetDirectoryName(crpPath) ?? "",
-                        filename);
-
-                    // skip files which were already parsed
-                    if(checkedPaths.Contains(vehicleEffectsDefPath)) continue;
-                    checkedPaths.Add(vehicleEffectsDefPath);
-
-                    if(!File.Exists(vehicleEffectsDefPath)) continue;
-
-                    VehicleEffectsDefinition vehicleEffectsDef = null;
-
-                    var xmlSerializer = new XmlSerializer(typeof(VehicleEffectsDefinition));
-                    try
+                    foreach(var loader in configLoaders)
                     {
-                        using(var streamReader = new System.IO.StreamReader(vehicleEffectsDefPath))
-                        {
-                            vehicleEffectsDef = xmlSerializer.Deserialize(streamReader) as VehicleEffectsDefinition;
-                        }
+                        var path = Path.Combine(Path.GetDirectoryName(crpPath) ?? "", loader.FileName);
+                        // skip files which were already parsed
+                        if(checkedPaths.Contains(path)) continue;
+                        checkedPaths.Add(path);
+                        if(!File.Exists(path)) continue;
+                        loader.OnFileFound(path, asset.package.packageName, false);
                     }
-                    catch(Exception e)
-                    {
-                        Logging.LogException(e);
-                        vehicleEffectsDefParseErrors.Add(asset.package.packageName + " - " + e.Message);
-                        continue;
-                    }
-
-                    loadedDefinitions.Add(vehicleEffectsDef);
-                    definitionPackages.Add(vehicleEffectsDef, asset.package.packageName);
                 }
 
                 // Apply the effects
@@ -351,8 +310,7 @@ namespace VehicleEffects
 
             vehicleEffectsDefParseErrors = null;
             hasChangedPrefabs = true;
-
-            eventVehicleUpdateFinished?.Invoke();
+            OnVehicleUpdateFinished();
         }
 
         /// <summary>

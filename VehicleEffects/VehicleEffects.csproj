@@ -55,6 +55,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SoundEffectsLoader.cs" />
+    <Compile Include="Utilities\ConfigLoader.cs" />
     <Compile Include="Editor\EffectPreviewer.cs" />
     <Compile Include="Editor\PrefabWatcher.cs" />
     <Compile Include="Editor\UIEffectListPanel.cs" />
@@ -94,8 +96,12 @@
     <Compile Include="SoundEffectOptions.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="VehicleEffectsDefinition.cs" />
+    <Compile Include="VehicleEffectsLoader.cs" />
     <Compile Include="VehicleEffectsMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="VehicleEffectsMod.api.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
