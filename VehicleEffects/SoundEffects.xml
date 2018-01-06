@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<SoundEffectsDefinition>
+  <Effects>
+    <SoundEffect 
+      name="Steam Train Movement"
+      base="Train Movement"
+      file="sounds/steam-engine-a3-moving.ogg"
+      type="EngineSoundEffect"
+      volume="0.7"
+      />
+    <SoundEffect
+      name="Diesel Train Movement"
+      base="Train Movement"
+      file="sounds/diesel-engine-sd45-moving.ogg"
+      type="EngineSoundEffect"
+      />
+    <SoundEffect
+      name="Rolling Train Movement"
+      base="Train Movement"
+      file="sounds/rolling-stock-moving.ogg"
+      type="EngineSoundEffect"
+      volume="0.8"
+      />
+    <SoundEffect
+      name="Train Bell"
+      base="Train Movement"
+      file="sounds/train-bell.ogg"
+      volume="0.8"
+      pitch="1.0"
+      loop="true"
+      randomtime="false"
+      />
+    <SoundEffect
+     name="Train Horn"
+     base="Train Movement"
+     file="sounds/train-horn-loop.ogg"
+     fadelength="0.18"
+     volume="0.7"
+     pitch="1.0"
+     loop="true"
+     randomtime="false"
+      />
+    <SoundEffect
+     name="Train Whistle"
+     base="Train Movement"
+     file="sounds/train-whistle.ogg"
+     fadelength="0.4"
+     volume="0.7"
+     pitch="1.4"
+     loop="true"
+     randomtime="false"
+      />
+  </Effects>
+</SoundEffectsDefinition>

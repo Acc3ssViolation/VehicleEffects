@@ -32,6 +32,7 @@ namespace VehicleEffects
         private bool hasChangedPrefabs;
         private List<SoundEffectOptions> soundEffectOptions;
         private ReloadEffectsBehaviour reloadBehaviour;
+        private CustomSoundsManager customSounds = new CustomSoundsManager();
 
         private List<ConfigLoader> configLoaders = new List<ConfigLoader>();
         private List<VehicleEffectsDefinition> loadedDefinitions = new List<VehicleEffectsDefinition>();
@@ -73,7 +74,7 @@ namespace VehicleEffects
             ignoreModVehicleParseErrors = new SavedBool("ShowModMissingVehicleErrors", "VehicleEffectsMod", true, true);
 
             configLoaders.Add(new VehicleEffectsLoader(loadedDefinitions, definitionPackages, vehicleEffectsDefParseErrors));
-            configLoaders.Add(new SoundEffectsLoader(vehicleEffectsDefParseErrors));
+            configLoaders.Add(new SoundEffectsLoader(vehicleEffectsDefParseErrors, customSounds));
         }
 
         public void OnSettingsUI(UIHelperBase helper)
@@ -101,7 +102,7 @@ namespace VehicleEffects
             soundEffectOptions.Add(new SoundEffectOptions("Train Horn", 0.7f));
             soundEffectOptions.Add(new SoundEffectOptions("Train Bell", 0.8f));
             soundEffectOptions.Add(new SoundEffectOptions("Train Whistle", 0.7f));
-            //soundEffectOptions.Add(new SoundEffectOptions("Steam Train Movement", 0.7f));
+            //soundEffectOptions.Add(new SoundEffectOptions("Steam Train Movement Test", 0.7f));
             //soundEffectOptions.Add(new SoundEffectOptions("Diesel Train Movement", 0.5f));
             //soundEffectOptions.Add(new SoundEffectOptions("Rolling Train Movement", 0.8f));
             //soundEffectOptions.Add(new SoundEffectOptions("Propeller Aircraft Sound", 0.65f));
@@ -168,6 +169,7 @@ namespace VehicleEffects
                 CreateCustomEffects();
                 reloadBehaviour = gameObject.AddComponent<ReloadEffectsBehaviour>();
                 reloadBehaviour.SetMod(this);
+                customSounds.InitializeGameObjects(gameObject.transform);
             }
             Logging.Log("Done initializing Game Objects");
         }
@@ -187,15 +189,15 @@ namespace VehicleEffects
             DieselSmoke.CreateEffectObject(t);
 
             // Custom sounds
-            SteamTrainMovement.CreateEffectObject(t);
-            DieselTrainMovement.CreateEffectObject(t);
-            RollingTrainMovement.CreateEffectObject(t);
-            TrainHorn.CreateEffectObject(t);
-            TrainWhistle.CreateEffectObject(t);
-            TrainBell.CreateEffectObject(t);
+            //SteamTrainMovement.CreateEffectObject(t);
+            //DieselTrainMovement.CreateEffectObject(t);
+            //RollingTrainMovement.CreateEffectObject(t);
+            //TrainHorn.CreateEffectObject(t);
+            //TrainWhistle.CreateEffectObject(t);
+            //TrainBell.CreateEffectObject(t);
 
             // Planes
-            //PropAircraftMovement.CreateEffectObject(t);
+            PropAircraftMovement.CreateEffectObject(t);
             //PropellerEffectManager.CreateEffectObject(t);
 
             // Custom lights
@@ -214,6 +216,7 @@ namespace VehicleEffects
         {
             Logging.Log("Reloading Vehicle Effects");
             ResetVehicleEffects();
+            customSounds.Reset(gameObject.transform);
             UpdateVehicleEffects();
         }
 
@@ -301,14 +304,19 @@ namespace VehicleEffects
                 Logging.LogException(e);
             }
 
-            if(vehicleEffectsDefParseErrors?.Count > 0 && showParseErrors)
+            if(vehicleEffectsDefParseErrors.Count > 0 && showParseErrors)
             {
                 var errorMessage = vehicleEffectsDefParseErrors.Aggregate("Error while parsing vehicle effect definition file(s). Assets will work but may have effects missing. Contact the author of the asset(s). \n" + "List of errors:\n", (current, error) => current + (error + '\n'));
 
                 UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Vehicle Effects", errorMessage, false);
             }
 
-            vehicleEffectsDefParseErrors = null;
+            // Initialize the options menu here to allow this mod's own sound effects to be loaded via xml
+            foreach(var option in soundEffectOptions)
+            {
+                option.Initialize();
+            }
+
             hasChangedPrefabs = true;
             OnVehicleUpdateFinished();
         }
@@ -330,11 +338,12 @@ namespace VehicleEffects
                 return;
             }
 
+            Logging.Log("Parsing definition for " + vehicleDef.Name + " with parse errors " + (noParseErrors ? "Disabled" : "Enabled"));
+
             if(vehicleDefPrefab == null)
             {
                 vehicleDefPrefab = FindVehicle(vehicleDef.Name, packageName);
             }
-            
 
             if(vehicleDefPrefab == null)
             {
@@ -342,12 +351,12 @@ namespace VehicleEffects
                 return;
             }
 
+
             if(vehicleDef.Effects == null || vehicleDef.Effects.Count == 0)
             {
                 if(!noParseErrors) parseErrors.Add(packageName + " - No effects specified for " + vehicleDef.Name + ".");
                 return;
             }
-
 
             if(vehicleDef.ApplyToTrailersOnly)
             {
@@ -370,7 +379,6 @@ namespace VehicleEffects
 
                 return;
             }
-
 
             // Backup default effects array
             if(!backup.ContainsKey(vehicleDefPrefab))

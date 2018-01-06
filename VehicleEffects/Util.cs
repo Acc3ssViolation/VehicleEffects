@@ -97,7 +97,18 @@ namespace VehicleEffects
             }
         }
 
-        public static EngineSoundEffect CopyEngineSoundEffect(EngineSoundEffect template, EngineSoundEffect target)
+        public static SoundEffect CopySoundEffect(SoundEffect template, SoundEffect target, bool copyAudioInfo = true)
+        {
+            target.m_position = template.m_position;
+            target.m_range = template.m_range;
+            if(copyAudioInfo)
+            {
+                target.m_audioInfo = template.m_audioInfo;
+            }
+            return target;
+        }
+
+        public static EngineSoundEffect CopyEngineSoundEffect(EngineSoundEffect template, EngineSoundEffect target, bool copyAudioInfo = true)
         {
             target.m_minPitch = template.m_minPitch;
             target.m_minRange = template.m_minRange;
@@ -107,7 +118,10 @@ namespace VehicleEffects
             target.m_range = template.m_range;
             target.m_rangeAccelerationMultiplier = template.m_rangeAccelerationMultiplier;
             target.m_rangeSpeedMultiplier = template.m_rangeSpeedMultiplier;
-            target.m_audioInfo = template.m_audioInfo;
+            if(copyAudioInfo)
+            {
+                target.m_audioInfo = template.m_audioInfo;
+            }
 
             return target;
         }

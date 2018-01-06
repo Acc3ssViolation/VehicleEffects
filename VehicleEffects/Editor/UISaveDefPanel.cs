@@ -121,7 +121,7 @@ namespace VehicleEffects.Editor
                 {
                     Directory.CreateDirectory(saveDir);
                 }
-                string savePath = Path.Combine(saveDir, VehicleEffectsMod.filename);
+                string savePath = Path.Combine(saveDir, "VehicleEffectsDefinition.xml");
                 //int i = 0;
                 while(File.Exists(savePath))
                 {

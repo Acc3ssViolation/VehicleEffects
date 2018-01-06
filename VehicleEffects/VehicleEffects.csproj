@@ -55,6 +55,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomSoundsManager.cs" />
+    <Compile Include="SoundEffectsDefinition.cs" />
     <Compile Include="SoundEffectsLoader.cs" />
     <Compile Include="Utilities\ConfigLoader.cs" />
     <Compile Include="Editor\EffectPreviewer.cs" />
@@ -103,11 +105,16 @@
   <ItemGroup>
     <Compile Include="VehicleEffectsMod.api.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="SoundEffects.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetPath)" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\$(TargetFileName)"* /Y /R
 
 xcopy "$(SolutionDir)\Sounds" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\Sounds" /I /Y /R
+
+xcopy "$(SolutionDir)SoundEffects.xml" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\" /I /Y /R
 
 xcopy "$(SolutionDir)\AssetBundles" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\AssetBundles" /I /Y /R</PostBuildEvent>
   </PropertyGroup>
