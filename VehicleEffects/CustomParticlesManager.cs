@@ -14,6 +14,17 @@ namespace VehicleEffects
     class CustomParticlesManager
     {
         private Dictionary<string, ParticleEffect> effects = new Dictionary<string, ParticleEffect>();
+        private GameObject effectRoot;
+
+        public void InitializeGameObjects(Transform parent)
+        {
+            if(effectRoot == null)
+            {
+                effectRoot = new GameObject("Custom Particles");
+                effectRoot.transform.SetParent(parent);
+                GameObject.DontDestroyOnLoad(effectRoot);
+            }
+        }
 
         public void Destroy()
         {
@@ -22,11 +33,17 @@ namespace VehicleEffects
                 GameObject.Destroy(entry.Value.gameObject);
             }
             effects.Clear();
+            if(effectRoot != null)
+            {
+                GameObject.Destroy(effectRoot);
+                effectRoot = null;
+            }
         }
 
-        public void Reset()
+        public void Reset(Transform parent)
         {
             Destroy();
+            InitializeGameObjects(parent);
         }
 
         public bool AddEffect(ParticleEffect effect)
@@ -36,6 +53,7 @@ namespace VehicleEffects
                 return false;
             }
             effects[effect.name] = effect;
+            effect.transform.SetParent(effectRoot.transform);
             return true;
         }
 

@@ -18,7 +18,7 @@ namespace VehicleEffects
     public partial class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.7.1";
+        public const string version = "1.8.0";
 
         private SavedBool showParseErrors;
         private SavedBool enableEditor;
@@ -76,7 +76,7 @@ namespace VehicleEffects
 
             configLoaders.Add(new VehicleEffectsLoader(loadedDefinitions, definitionPackages, vehicleEffectsDefParseErrors));
             configLoaders.Add(new SoundEffectsLoader(vehicleEffectsDefParseErrors, customSounds));
-            //configLoaders.Add(new ParticleEffectsLoader(vehicleEffectsDefParseErrors, customParticles));
+            configLoaders.Add(new ParticleEffectsLoader(vehicleEffectsDefParseErrors, customParticles));
         }
 
         public void OnSettingsUI(UIHelperBase helper)
@@ -159,7 +159,7 @@ namespace VehicleEffects
                 ResetVehicleEffects();
             }
             customSounds.Reset(gameObject.transform);
-            customParticles.Reset();
+            customParticles.Reset(gameObject.transform);
         }
 
         private void InitializeGameObjects()
@@ -173,6 +173,7 @@ namespace VehicleEffects
                 CreateCustomEffects();
                 reloadBehaviour = gameObject.AddComponent<ReloadEffectsBehaviour>();
                 reloadBehaviour.SetMod(this);
+                customParticles.InitializeGameObjects(gameObject.transform);
                 customSounds.InitializeGameObjects(gameObject.transform);
             }
             Logging.Log("Done initializing Game Objects");
@@ -190,7 +191,7 @@ namespace VehicleEffects
 
             // Custom particles
             VehicleSteam.CreateEffectObject(t);
-            DieselSmoke.CreateEffectObject(t);
+            //DieselSmoke.CreateEffectObject(t);
 
             // Custom sounds
             //SteamTrainMovement.CreateEffectObject(t);
@@ -221,7 +222,7 @@ namespace VehicleEffects
             Logging.Log("Reloading Vehicle Effects");
             ResetVehicleEffects();
             customSounds.Reset(gameObject.transform);
-            customParticles.Reset();
+            customParticles.Reset(gameObject.transform);
             UpdateVehicleEffects();
         }
 

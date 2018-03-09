@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ParticleEffectsDefinition>
+  <Effects>
+    <ParticleEffect
+      name="Diesel Smoke"
+      base="Factory Smoke Small"
+      velocitymultiplier="0"
+      spawnarearadius="0.25"
+      minmagnitude="0.1"
+      magspeedmultiplier="0"
+      magaccmultiplier="1"
+      usebezier="false"
+      usemeshdata="false"
+      usepositions="true"
+      minspawnangle="0"
+      minstartspeed="5.5"
+      minlifetime="1"
+      maxlifetime="3"
+      maxspawnangle="20"
+      maxstartspeed="8.5"
+      />
+  </Effects>
+</ParticleEffectsDefinition>

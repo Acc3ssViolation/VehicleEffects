@@ -109,6 +109,7 @@
     <Compile Include="VehicleEffectsMod.api.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ParticleEffects.xml" />
     <Content Include="SoundEffects.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -120,6 +121,7 @@
 xcopy "$(SolutionDir)\Sounds" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\Sounds" /I /Y /R
 
 xcopy "$(SolutionDir)SoundEffects.xml" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\" /I /Y /R
+xcopy "$(SolutionDir)ParticleEffects.xml" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\" /I /Y /R
 
 xcopy "$(SolutionDir)\AssetBundles" %25localappdata%25"\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\AssetBundles" /I /Y /R</PostBuildEvent>
   </PropertyGroup>
