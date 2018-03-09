@@ -55,8 +55,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomParticlesManager.cs" />
     <Compile Include="CustomSoundsManager.cs" />
+    <Compile Include="ParticleEffectsDefinition.cs" />
     <Compile Include="SoundEffectsDefinition.cs" />
+    <Compile Include="ParticleEffectsLoader.cs" />
     <Compile Include="SoundEffectsLoader.cs" />
     <Compile Include="Utilities\ConfigLoader.cs" />
     <Compile Include="Editor\EffectPreviewer.cs" />
@@ -106,7 +109,9 @@
     <Compile Include="VehicleEffectsMod.api.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="SoundEffects.xml" />
+    <Content Include="SoundEffects.xml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -18,7 +18,7 @@ namespace VehicleEffects
     public partial class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.7";
+        public const string version = "1.7.1";
 
         private SavedBool showParseErrors;
         private SavedBool enableEditor;
@@ -33,6 +33,7 @@ namespace VehicleEffects
         private List<SoundEffectOptions> soundEffectOptions;
         private ReloadEffectsBehaviour reloadBehaviour;
         private CustomSoundsManager customSounds = new CustomSoundsManager();
+        private CustomParticlesManager customParticles = new CustomParticlesManager();
 
         private List<ConfigLoader> configLoaders = new List<ConfigLoader>();
         private List<VehicleEffectsDefinition> loadedDefinitions = new List<VehicleEffectsDefinition>();
@@ -43,7 +44,7 @@ namespace VehicleEffects
         {
             get
             {
-                return "Allows extra effects to be added to vehicles. Updated for Green Cities";
+                return "Allows extra effects to be added to vehicles. Now with custom sound effects.";
             }
         }
 
@@ -75,6 +76,7 @@ namespace VehicleEffects
 
             configLoaders.Add(new VehicleEffectsLoader(loadedDefinitions, definitionPackages, vehicleEffectsDefParseErrors));
             configLoaders.Add(new SoundEffectsLoader(vehicleEffectsDefParseErrors, customSounds));
+            //configLoaders.Add(new ParticleEffectsLoader(vehicleEffectsDefParseErrors, customParticles));
         }
 
         public void OnSettingsUI(UIHelperBase helper)
@@ -156,6 +158,8 @@ namespace VehicleEffects
             {
                 ResetVehicleEffects();
             }
+            customSounds.Reset(gameObject.transform);
+            customParticles.Reset();
         }
 
         private void InitializeGameObjects()
@@ -217,6 +221,7 @@ namespace VehicleEffects
             Logging.Log("Reloading Vehicle Effects");
             ResetVehicleEffects();
             customSounds.Reset(gameObject.transform);
+            customParticles.Reset();
             UpdateVehicleEffects();
         }
 
