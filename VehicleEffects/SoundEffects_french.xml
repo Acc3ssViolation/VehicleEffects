@@ -2,53 +2,53 @@
 <SoundEffectsDefinition>
   <Effects>
     <SoundEffect 
-      name="Steam Train Movement"
-      base="Train Movement"
+      name="Mouvement de train à vapeur"
+      base="Mouvement du train"
       file="sounds/steam-engine-a3-moving.ogg"
       type="EngineSoundEffect"
       volume="0.7"
       />
     <SoundEffect
-      name="Diesel Train Movement"
-      base="Train Movement"
+      name="Mouvement du train Diesel"
+      base="Mouvement du Train"
       file="sounds/diesel-engine-sd45-moving.ogg"
       type="EngineSoundEffect"
       />
     <SoundEffect
-      name="Rolling Train Movement"
-      base="Train Movement"
+      name="Mouvement de train roulant"
+      base="Mouvement du train"
       file="sounds/rolling-stock-moving.ogg"
       type="EngineSoundEffect"
       volume="0.8"
       />
     <SoundEffect
-      name="Train Bell"
-      base="Train Movement"
+      name="Cloche du train"
+      base="Mouvement du train"
       file="sounds/train-bell.ogg"
       volume="0.8"
       pitch="1.0"
-      loop="true"
-      randomtime="false"
+      loop="vrai"
+      randomtime="faux"
       />
     <SoundEffect
-     name="Train Horn"
-     base="Train Movement"
+     name="Klaxon du Train"
+     base="Mouvement du train"
      file="sounds/train-horn-loop.ogg"
      fadelength="0.18"
      volume="0.7"
      pitch="1.0"
-     loop="true"
-     randomtime="false"
+     loop="vrai"
+     randomtime="faux"
       />
     <SoundEffect
-     name="Train Whistle"
-     base="Train Movement"
+     name="Sifflet du Train"
+     base="Mouvement du train"
      file="sounds/train-whistle.ogg"
      fadelength="0.4"
      volume="0.7"
      pitch="1.4"
-     loop="true"
-     randomtime="false"
+     loop="vrai"
+     randomtime="faux"
       />
   </Effects>
 </SoundEffectsDefinition>
