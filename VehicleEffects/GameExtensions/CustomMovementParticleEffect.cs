@@ -13,6 +13,10 @@ namespace VehicleEffects.GameExtensions
         /// Radius of spawn area.
         /// </summary>
         public float m_spawnAreaRadius = 0.25f;
+        /// <summary>
+        /// Overrides the particle's start color
+        /// </summary>
+        public Color? m_colorOverride = null;
 
         private ParticleSystem m_particleSystemOverride;
 
@@ -86,7 +90,7 @@ namespace VehicleEffects.GameExtensions
 
                     position += matrix.MultiplyVector(b);
                     emitParams.position = position;
-                    emitParams.startColor = m_particleSystem.startColor;
+                    emitParams.startColor = m_colorOverride != null ? m_colorOverride.Value : m_particleSystem.startColor;
                     emitParams.velocity = velocity + matrix.MultiplyVector(a) * startSpeed;
                     emitParams.startLifetime = this.m_minLifeTime + (this.m_maxLifeTime - this.m_minLifeTime) * UnityEngine.Random.value;
                     emitParams.startSize = this.m_particleSystem.startSize;

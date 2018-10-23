@@ -146,6 +146,7 @@ namespace VehicleEffects
                 ApplyNullableSetting(ref effect.m_velocityMultiplier, settings.m_velocityMultiplier);
                 ApplyNullableSetting(ref effect.m_spawnAreaRadius, settings.m_spawnAreaRadius);
             }
+            effect.m_colorOverride = settings.Color.ToUnity();
 
             effect.name = settings.Name;
 

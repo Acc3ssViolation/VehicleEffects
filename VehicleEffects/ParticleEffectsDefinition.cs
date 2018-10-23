@@ -11,6 +11,24 @@ namespace VehicleEffects
         public List<ParticleEffectParams> Effects { get; set; }
     }
 
+    [XmlType(TypeName = "Color")]
+    public class ParticleColor
+    {
+        [XmlAttribute("r")]
+        public float r;
+        [XmlAttribute("g")]
+        public float g;
+        [XmlAttribute("b")]
+        public float b;
+        [XmlAttribute("a")]
+        public float a;
+
+        public UnityEngine.Color ToUnity()
+        {
+            return new UnityEngine.Color(r, g, b, a);
+        }
+    }
+
     [XmlType(TypeName = "ParticleEffect")]
     public class ParticleEffectParams
     {
@@ -60,11 +78,14 @@ namespace VehicleEffects
         public float m_velocityMultiplier { get; set; }
         [XmlAttribute("spawnarearadius")]
         public float m_spawnAreaRadius { get; set; }
+        // Subtag
+        public ParticleColor Color { get; set; }
 
         public ParticleEffectParams()
         {
             Name = "";
             Base = "";
+            Color = null;
         }
 
         public virtual ParticleEffect CreateEffect()
