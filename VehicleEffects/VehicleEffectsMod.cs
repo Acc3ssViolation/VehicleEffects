@@ -18,7 +18,7 @@ namespace VehicleEffects
     public partial class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.8.1a";
+        public const string version = "1.8.1b";
 
         private SavedBool showParseErrors;
         private SavedBool enableEditor;
@@ -277,7 +277,11 @@ namespace VehicleEffects
                     var asset = PackageManager.FindAssetByName(prefab.name);
 
                     var crpPath = asset?.package?.packagePath;
-                    if(crpPath == null) continue;
+                    if(crpPath == null)
+                    {
+                        Logging.Log("No package path for prefab " + prefab.name + " can not load configs from its directory");
+                        continue;
+                    }
 
                     foreach(var loader in configLoaders)
                     {
@@ -288,6 +292,12 @@ namespace VehicleEffects
                         if(!File.Exists(path)) continue;
                         loader.OnFileFound(path, asset.package.packageName, false);
                     }
+                }
+
+                // Dump loaded packages in log
+                foreach(var loadedPackage in definitionPackages)
+                {
+                    Logging.Log("Package " + loadedPackage.Value + ": " + loadedPackage.Key.Vehicles.Count + " vehicles");
                 }
 
                 // Apply the effects
@@ -428,6 +438,8 @@ namespace VehicleEffects
                     }
                 }
             }
+
+            Logging.Log("Finished applying definition for " + vehicleDef.Name);
         }
 
         public static void ParseEffectDefinition(VehicleEffectsDefinition.Vehicle vehicleDef, VehicleEffectsDefinition.Effect effectDef, List<VehicleInfo.Effect> effectsList, ref HashSet<string> parseErrors)
@@ -600,6 +612,7 @@ namespace VehicleEffects
             if(effectDef.Replacment == null)
             {
                 effectsList.Add(vehicleInfoEffect);
+                Logging.Log("Added effect " + effectDef.Name + " to vehicle " + vehicleDef.Name);
             }
             else
             {
@@ -623,6 +636,11 @@ namespace VehicleEffects
                 if(indexToRemove >= 0)
                 {
                     effectsList.RemoveAt(indexToRemove);
+                    Logging.Log("Removed effect " + effectDef.Name + " from vehicle " + vehicleDef.Name);
+                }
+                else
+                {
+                    Logging.Log("Replaced effect " + effectDef.Name + " with " + effectDef.Replacment + " for vehicle " + vehicleDef.Name);
                 }
             }
         }
