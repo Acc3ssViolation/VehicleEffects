@@ -21,17 +21,23 @@ namespace VehicleEffects
             {
                 effectRoot = new GameObject("Custom Sounds");
                 effectRoot.transform.SetParent(parent);
-                GameObject.DontDestroyOnLoad(effectRoot);
             }
         }
 
         public void Destroy()
         {
-            if(effectRoot != null)
+            foreach (var item in effects)
+            {
+                item.Value.ReleaseEffect();
+                VehicleEffectsMod.UnregisterEffect(item.Value.name);
+                GameObject.Destroy(item.Value.gameObject);
+            }
+            effects.Clear();
+
+            if (effectRoot != null)
             {
                 GameObject.Destroy(effectRoot);
                 effectRoot = null;
-                effects.Clear();
             }
         }
 
@@ -49,6 +55,13 @@ namespace VehicleEffects
             }
             effects[effect.name] = effect;
             effect.transform.SetParent(effectRoot.transform);
+
+            effect.InitializeEffect();
+            if (!VehicleEffectsMod.RegisterEffect(effect.name, effect))
+            {
+                Logging.LogError($"Custom effect named {effect.name} is already registered!");
+            }
+
             return true;
         }
 
@@ -112,6 +125,7 @@ namespace VehicleEffects
             Util.CopySoundEffect(baseEffect, effect, false);
             effect.m_audioInfo = UnityEngine.Object.Instantiate(baseEffect.m_audioInfo) as AudioInfo;
             effect.m_audioInfo.m_clip = clip;
+            effect.m_audioInfo.name = settings.Name + " Audio Info";
 
             // Apply general settings
             ApplySoundEffectSettings(effect, settings);

@@ -18,6 +18,7 @@ namespace VehicleEffects.Effects
             {
                 MultiEffect newMultiEffect = GameObject.Instantiate(defaultMultiEffect);
                 newMultiEffect.name = effectName;
+                newMultiEffect.transform.SetParent(parent);
 
                 newMultiEffect.m_effects[0].m_effect = PropAircraftSound.CreateEffectObject(parent);
 

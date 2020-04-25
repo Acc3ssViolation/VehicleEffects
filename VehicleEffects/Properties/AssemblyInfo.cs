@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("VehicleEffects")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("VehicleEffects")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCompany("Acc3ssViolation")]
+[assembly: AssemblyProduct("Vehicle Effects")]
+[assembly: AssemblyCopyright("Copyright ©  2016 - 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -33,4 +33,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.1.*")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion(VehicleEffects.VehicleEffectsMod.version)]

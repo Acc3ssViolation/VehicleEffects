@@ -13,19 +13,39 @@ namespace VehicleEffects.Effects
         private const string effectName = "Custom Multi Effects";
         private static List<CustomMultiEffect> createdEffects;
 
-        public static GameObject CreateEffectObject(Transform parent)
+        public static void Initialize(Transform parent)
         {
             if(gameObject != null)
             {
                 Logging.LogWarning("Creating effect object for " + effectName + " but object already exists!");
+                return;
             }
 
             createdEffects = new List<CustomMultiEffect>();
             gameObject = new GameObject(effectName);
             gameObject.transform.parent = parent;
-            return gameObject;
         }
 
+        public static void Destroy()
+        {
+            Logging.Log("Clearing custom multi effects");
+
+            // Nuke the custom effects
+            foreach (var customEffect in createdEffects)
+            {
+                GameObject.Destroy(customEffect.gameObject);
+            }
+            createdEffects.Clear();
+
+            // Nuke the root
+            if (gameObject != null)
+            {
+                GameObject.Destroy(gameObject);
+                gameObject = null;
+            }
+
+            Logging.Log("Finished clearing custom multi effects");
+        }
 
         public static EffectInfo CreateEffect(VehicleEffectsDefinition.Effect effectDef, MultiEffect.SubEffect[] subEffects, float duration, bool useSimulationTime)
         {

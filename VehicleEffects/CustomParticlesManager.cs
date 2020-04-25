@@ -22,17 +22,20 @@ namespace VehicleEffects
             {
                 effectRoot = new GameObject("Custom Particles");
                 effectRoot.transform.SetParent(parent);
-                GameObject.DontDestroyOnLoad(effectRoot);
             }
         }
 
         public void Destroy()
         {
-            foreach(var entry in effects)
+            foreach (var entry in effects)
             {
+                entry.Value.ReleaseEffect();
+                VehicleEffectsMod.UnregisterEffect(entry.Value.name);
+
                 GameObject.Destroy(entry.Value.gameObject);
             }
             effects.Clear();
+
             if(effectRoot != null)
             {
                 GameObject.Destroy(effectRoot);
@@ -54,6 +57,13 @@ namespace VehicleEffects
             }
             effects[effect.name] = effect;
             effect.transform.SetParent(effectRoot.transform);
+
+            effect.InitializeEffect();
+            if (!VehicleEffectsMod.RegisterEffect(effect.name, effect))
+            {
+                Logging.LogError($"Custom effect named {effect.name} is already registered!");
+            }
+
             return true;
         }
 
@@ -99,8 +109,21 @@ namespace VehicleEffects
             }
 
 
-            // Create effect
-            var effect = new GameObject().AddComponent<CustomMovementParticleEffect>();
+            // Create effect object. We copy the base effect object so we also get a copy of the particle systems
+            var effectObject = GameObject.Instantiate(baseEffect).gameObject;
+
+            {
+                // Delete existing effect scripts since we want to use our own
+                // Otherwise we'd get extra copies of the base effect and we have no use for those
+                var effectScripts = effectObject.GetComponents<EffectInfo>();
+                foreach (var script in effectScripts)
+                {
+                    GameObject.Destroy(script);
+                }
+            }
+
+            var effect = effectObject.AddComponent<CustomMovementParticleEffect>();
+
             // Apply general settings
             ApplyNullableSettingWithDefault(ref effect.m_canUseBezier, settings.m_canUseBezier, baseEffect.m_canUseBezier);
             ApplyNullableSettingWithDefault(ref effect.m_canUseMeshData, settings.m_canUseMeshData, baseEffect.m_canUseMeshData);
@@ -148,10 +171,7 @@ namespace VehicleEffects
             }
             effect.m_colorOverride = settings.Color?.ToUnity();
 
-            effect.name = settings.Name;
-
-            // Specify particle system to use
-            effect.ParticleSystemOverride = baseEffect.gameObject.GetComponent<ParticleSystem>();
+            effect.name = settings.Name;          
 
             return effect;
         }

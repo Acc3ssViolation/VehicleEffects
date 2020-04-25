@@ -18,26 +18,8 @@ namespace VehicleEffects.GameExtensions
         /// </summary>
         public Color? m_colorOverride = null;
 
-        private ParticleSystem m_particleSystemOverride;
-
-        private string m_particleSystemOverrideName = null;
-
-        public ParticleSystem ParticleSystemOverride
-        {
-            get
-            {
-                return m_particleSystemOverride;
-            }
-            set
-            {
-                m_particleSystemOverride = value;
-                m_particleSystemOverrideName = m_particleSystemOverride.gameObject.name;
-            }
-        }
-
         public override void RenderEffect(InstanceID id, EffectInfo.SpawnArea area, Vector3 velocity, float acceleration, float magnitude, float timeOffset, float timeDelta, RenderManager.CameraInfo cameraInfo)
         {
-            
             Vector3 point = area.m_matrix.MultiplyPoint(Vector3.zero);
 
             if(cameraInfo.CheckRenderDistance(point, this.m_maxVisibilityDistance) && cameraInfo.Intersect(point, 100f))
@@ -54,15 +36,8 @@ namespace VehicleEffects.GameExtensions
             }
         }
 
-
         public new void EmitParticles(InstanceID id, Matrix4x4 matrix, Vector4[] positions, Vector3 velocity, float particlesPerSquare, int probability, ref Vector3 min, ref Vector3 max)
         {
-            // Fix for reloading from main menu
-            if(m_particleSystemOverrideName != null && m_particleSystemOverride == null)
-                m_particleSystemOverride = VehicleEffectsMod.FindEffect(m_particleSystemOverrideName)?.GetComponent<ParticleSystem>();
-            if(m_particleSystemOverride != null && m_particleSystemOverride != m_particleSystem)
-                m_particleSystem = m_particleSystemOverride;
-
             Randomizer randomizer = new Randomizer(id.RawData);
             var module = m_particleSystem.emission;
             particlesPerSquare *= module.rate.constant;
@@ -103,19 +78,32 @@ namespace VehicleEffects.GameExtensions
 
         protected override void CreateEffect()
         {
-            // Overridden to make sure the ParticleSystemOverride works correctly
             if (this.m_effectObject == null)
             {
+                // We don't have to spawn a new object as we are already a scene object
                 this.m_effectObject = gameObject;
-                this.m_effectComponent = gameObject.GetComponent<ParticleEffect>();
-                this.m_particleSystem = gameObject.GetComponent<ParticleSystem>();
-                if(m_particleSystem != null)
-                {
-                    var module = this.m_particleSystem.emission;
-                    module.enabled = false;
-                }
+                this.m_effectComponent = this;
                 this.m_particleSystems = gameObject.GetComponentsInChildren<ParticleSystem>();
+                this.m_particleSystem = gameObject.GetComponent<ParticleSystem>();
+                var emission = this.m_particleSystem.emission;
+                emission.enabled = false;
             }
+
+            base.CreateEffect();
+        }
+
+        protected override void DestroyEffect()
+        {
+
+            if (this.m_effectObject != null)
+            {
+                // Since we are using our own object as the effect object we don't actually want to destroy it
+                // This is because unlike the default game effects, we are not a prefab but we are normal scene object
+                this.m_effectObject = null;
+            }
+
+            // This will clean up the rest
+            base.DestroyEffect();
         }
     }
 }

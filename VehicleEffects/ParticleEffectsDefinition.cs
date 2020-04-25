@@ -75,9 +75,9 @@ namespace VehicleEffects
 
         // CustomMovementParticleEffect
         [XmlAttribute("velocitymultiplier")]
-        public float m_velocityMultiplier { get; set; }
+        public float? m_velocityMultiplier { get; set; }
         [XmlAttribute("spawnarearadius")]
-        public float m_spawnAreaRadius { get; set; }
+        public float? m_spawnAreaRadius { get; set; }
         // Subtag
         public ParticleColor Color { get; set; }
 

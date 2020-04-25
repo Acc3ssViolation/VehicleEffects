@@ -14,12 +14,12 @@ namespace VehicleEffects.Effects
         private static Dictionary<string, EffectInfo> modifiedEffects;
         private static Dictionary<VehicleEffectWrapper.VehicleEffectParams, VehicleEffectWrapper> createdEffects;
 
-
-        public static GameObject CreateEffectObject(Transform parent)
+        public static void Initialize(Transform parent)
         {
-            if(gameObject != null)
+            if (gameObject != null)
             {
                 Logging.LogWarning("Creating effect object for " + effectName + " but object already exists!");
+                return;
             }
 
             modifiedEffects = new Dictionary<string, EffectInfo>();
@@ -27,7 +27,34 @@ namespace VehicleEffects.Effects
 
             gameObject = new GameObject(effectName + " Effects");
             gameObject.transform.parent = parent;
-            return gameObject;
+        }
+
+        public static void Destroy()
+        {
+            Logging.Log("Clearing custom effect wrappers");
+
+            // Nuke the modified effects
+            foreach (var moddedEffect in modifiedEffects)
+            {
+                GameObject.Destroy(moddedEffect.Value.gameObject);
+            }
+            modifiedEffects.Clear();
+
+            // Nuke the wrappers
+            foreach (var wrapper in createdEffects)
+            {
+                GameObject.Destroy(wrapper.Value.gameObject);
+            }
+            createdEffects.Clear();
+
+            // Nuke the root
+            if (gameObject != null)
+            {
+                GameObject.Destroy(gameObject);
+                gameObject = null;
+            }
+
+            Logging.Log("Finished clearing custom effect wrappers");
         }
 
 

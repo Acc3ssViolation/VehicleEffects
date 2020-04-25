@@ -18,7 +18,7 @@ namespace VehicleEffects
     public partial class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.8.1b";
+        public const string version = "1.9.0";
 
         private SavedBool showParseErrors;
         private SavedBool enableEditor;
@@ -39,6 +39,8 @@ namespace VehicleEffects
         private List<VehicleEffectsDefinition> loadedDefinitions = new List<VehicleEffectsDefinition>();
         private Dictionary<VehicleEffectsDefinition, string> definitionPackages = new Dictionary<VehicleEffectsDefinition, string>();
         private HashSet<string> vehicleEffectsDefParseErrors = new HashSet<string>();
+
+        private static Dictionary<string, EffectInfo> effectDictionary = new Dictionary<string, EffectInfo>();
 
         public string Description
         {
@@ -67,6 +69,12 @@ namespace VehicleEffects
                         fileName = "VehicleEffectsMod"
                     }
                 });
+            }
+
+            if (effectDictionary.Count != 0)
+            {
+                Logging.LogWarning("Clearing effects dictionary");
+                effectDictionary.Clear();
             }
 
             showParseErrors = new SavedBool("ShowParseErrors", "VehicleEffectsMod", true, true);
@@ -126,8 +134,10 @@ namespace VehicleEffects
             hasChangedPrefabs = false;
 
             InitializeGameObjects();
+            CustomVehicleEffect.Initialize(gameObject.transform);
+            CustomVehicleMultiEffect.Initialize(gameObject.transform);
 
-            if(mode != LoadMode.LoadGame && mode != LoadMode.NewGame)
+            if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame)
             {
                 // Editor
                 if(mode == LoadMode.LoadAsset || mode == LoadMode.NewAsset)
@@ -158,8 +168,12 @@ namespace VehicleEffects
             {
                 ResetVehicleEffects();
             }
+            CustomVehicleEffect.Destroy();
+            CustomVehicleMultiEffect.Destroy();
             customSounds.Reset(gameObject.transform);
             customParticles.Reset(gameObject.transform);
+
+            GC.Collect();
         }
 
         private void InitializeGameObjects()
@@ -185,31 +199,20 @@ namespace VehicleEffects
 
             var t = gameObject.transform;
 
-            // Wrappers
-            CustomVehicleEffect.CreateEffectObject(t);
-            CustomVehicleMultiEffect.CreateEffectObject(t);
-
             // Custom particles
-            VehicleSteam.CreateEffectObject(t);
-            //DieselSmoke.CreateEffectObject(t);
-
-            // Custom sounds
-            //SteamTrainMovement.CreateEffectObject(t);
-            //DieselTrainMovement.CreateEffectObject(t);
-            //RollingTrainMovement.CreateEffectObject(t);
-            //TrainHorn.CreateEffectObject(t);
-            //TrainWhistle.CreateEffectObject(t);
-            //TrainBell.CreateEffectObject(t);
+            var e = VehicleSteam.CreateEffectObject(t);
+            RegisterEffect(e.name, e, true);
 
             // Planes
-            PropAircraftMovement.CreateEffectObject(t);
-            //PropellerEffectManager.CreateEffectObject(t);
+            e = PropAircraftMovement.CreateEffectObject(t);
+            RegisterEffect(e.name, e, true);
 
             // Custom lights
-            TrainDitchLight.CreateEffectObject(t);
+            e = TrainDitchLight.CreateEffectObject(t);
+            RegisterEffect(e.name, e, true);
 
             // Initialize the options menu.
-            foreach(var option in soundEffectOptions)
+            foreach (var option in soundEffectOptions)
             {
                 option.Initialize();
             }
@@ -223,6 +226,13 @@ namespace VehicleEffects
             ResetVehicleEffects();
             customSounds.Reset(gameObject.transform);
             customParticles.Reset(gameObject.transform);
+            CustomVehicleEffect.Destroy();
+            CustomVehicleMultiEffect.Destroy();
+
+            GC.Collect();
+
+            CustomVehicleEffect.Initialize(gameObject.transform);
+            CustomVehicleMultiEffect.Initialize(gameObject.transform);
             UpdateVehicleEffects();
         }
 
@@ -612,7 +622,15 @@ namespace VehicleEffects
             if(effectDef.Replacment == null)
             {
                 effectsList.Add(vehicleInfoEffect);
-                Logging.Log("Added effect " + effectDef.Name + " to vehicle " + vehicleDef.Name);
+
+                if (effectDef.Base != null)
+                {
+                    Logging.Log("Added effect " + effectDef.Name + " (" + effectDef.Base + ") to vehicle " + vehicleDef.Name);
+                }
+                else
+                {
+                    Logging.Log("Added effect " + effectDef.Name + " to vehicle " + vehicleDef.Name);
+                }
             }
             else
             {
@@ -640,7 +658,15 @@ namespace VehicleEffects
                 }
                 else
                 {
-                    Logging.Log("Replaced effect " + effectDef.Name + " with " + effectDef.Replacment + " for vehicle " + vehicleDef.Name);
+                    if (effectDef.Base != null)
+                    {
+                        Logging.Log("Replaced effect " + effectDef.Name + " with " + effectDef.Replacment + " (" + effectDef.Base + ") for vehicle " + vehicleDef.Name);
+                    }
+                    else
+                    {
+                        Logging.Log("Replaced effect " + effectDef.Name + " with " + effectDef.Replacment + " for vehicle " + vehicleDef.Name);
+                    }
+                    
                 }
             }
         }
@@ -648,7 +674,19 @@ namespace VehicleEffects
         public static EffectInfo FindEffect(string effectName)
         {
             // Particle Effects aren't all added to EffectCollection, so search for GameObjects as well
-            var effect = EffectCollection.FindEffect(effectName) ?? GameObject.Find(effectName)?.GetComponent<EffectInfo>();
+            var effect = EffectCollection.FindEffect(effectName);
+            if (effect == null)
+            {
+                if (!effectDictionary.TryGetValue(effectName, out effect))
+                {
+                    Logging.Log($"Unknown effect {effectName}, falling back to GameObject.Find");
+                    var go = GameObject.Find(effectName);
+                    if (go != null)
+                    {
+                        effect = go.GetComponent<EffectInfo>();
+                    }
+                }
+            }
             return effect;
         }
 

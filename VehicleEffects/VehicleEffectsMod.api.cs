@@ -41,5 +41,29 @@ namespace VehicleEffects
                 Logging.LogException(e);
             }
         }
+
+        public static bool RegisterEffect(string name, EffectInfo effect, bool forceOverwrite = false)
+        {
+            if (!effectDictionary.ContainsKey(name))
+            {
+                effectDictionary.Add(name, effect);
+                Logging.Log($"Added effect dictionary entry for {name}");
+                return true;
+            }
+            else
+            {
+                Logging.LogWarning($"Overwriting effect dictionary entry for {name}");
+                effectDictionary[name] = effect;
+            }
+            return false;
+        }
+
+        public static void UnregisterEffect(string name)
+        {
+            if (effectDictionary.Remove(name))
+            {
+                Logging.Log($"Removed effect dictionary entry for {name}");
+            }
+        }
     }
 }
