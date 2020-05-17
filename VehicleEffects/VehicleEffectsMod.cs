@@ -18,7 +18,7 @@ namespace VehicleEffects
     public partial class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.9.0";
+        public const string version = "1.9.1";
 
         private SavedBool showParseErrors;
         private SavedBool enableEditor;
@@ -276,36 +276,47 @@ namespace VehicleEffects
                     }                    
                 }
 
-                // Load definitions from prefabs
-                for(uint i = 0; i < PrefabCollection<VehicleInfo>.LoadedCount(); i++)
+                // Using a sub function here since we have to do this for various prefab types
+                void LoadConfigsForPrefab(PrefabInfo prefab)
                 {
-                    var prefab = PrefabCollection<VehicleInfo>.GetLoaded(i);
-
                     // Check if asset is valid
-                    if(prefab == null) continue;
+                    if (prefab == null) return;
 
                     var asset = PackageManager.FindAssetByName(prefab.name);
 
                     var crpPath = asset?.package?.packagePath;
-                    if(crpPath == null)
+                    if (crpPath == null)
                     {
                         Logging.Log("No package path for prefab " + prefab.name + " can not load configs from its directory");
-                        continue;
+                        return;
                     }
 
-                    foreach(var loader in configLoaders)
+                    foreach (var loader in configLoaders)
                     {
                         var path = Path.Combine(Path.GetDirectoryName(crpPath) ?? "", loader.FileName);
                         // skip files which were already parsed
-                        if(checkedPaths.Contains(path)) continue;
+                        if (checkedPaths.Contains(path)) continue;
                         checkedPaths.Add(path);
-                        if(!File.Exists(path)) continue;
+                        if (!File.Exists(path)) continue;
                         loader.OnFileFound(path, asset.package.packageName, false);
                     }
                 }
 
+                // Load definitions from prefabs
+                for(uint i = 0; i < PrefabCollection<VehicleInfo>.LoadedCount(); i++)
+                {
+                    var prefab = PrefabCollection<VehicleInfo>.GetLoaded(i);
+                    LoadConfigsForPrefab(prefab);
+                }
+                // Workaround for configs not loading when props are included in the workshop upload
+                for (uint i = 0; i < PrefabCollection<PropInfo>.LoadedCount(); i++)
+                {
+                    var prefab = PrefabCollection<PropInfo>.GetLoaded(i);
+                    LoadConfigsForPrefab(prefab);
+                }
+
                 // Dump loaded packages in log
-                foreach(var loadedPackage in definitionPackages)
+                foreach (var loadedPackage in definitionPackages)
                 {
                     Logging.Log("Package " + loadedPackage.Value + ": " + loadedPackage.Key.Vehicles.Count + " vehicles");
                 }
