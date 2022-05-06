@@ -18,7 +18,7 @@ namespace VehicleEffects
     public partial class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.9.2";
+        public const string version = "1.9.3";
 
         private SavedBool showParseErrors;
         private SavedBool enableEditor;
@@ -343,9 +343,20 @@ namespace VehicleEffects
 
             if(vehicleEffectsDefParseErrors.Count > 0 && showParseErrors)
             {
-                var errorMessage = vehicleEffectsDefParseErrors.Aggregate("Error while parsing vehicle effect definition file(s). Assets will work but may have effects missing. Contact the author of the asset(s). \n" + "List of errors:\n", (current, error) => current + (error + '\n'));
+                // Log all parse errors to the log file as well, after processing. This makes them easier to find instead of them being spread out throughout the entire loading process
+                Logging.LogError($"Found {vehicleEffectsDefParseErrors.Count} errors while loading effects:");
 
-                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Vehicle Effects", errorMessage, false);
+                foreach (var parseError in vehicleEffectsDefParseErrors)
+                {
+                    Logging.LogError(parseError);
+                }
+
+                if (showParseErrors)
+                {
+                    var errorMessage = vehicleEffectsDefParseErrors.Aggregate("Error while parsing vehicle effect definition file(s). Assets will work but may have effects missing. Contact the author of the asset(s). \n" + "List of errors:\n", (current, error) => current + (error + '\n'));
+
+                    UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Vehicle Effects", errorMessage, false);
+                }
             }
 
             // Initialize the options menu here to allow this mod's own sound effects to be loaded via xml
