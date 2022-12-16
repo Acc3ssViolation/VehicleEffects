@@ -40,8 +40,7 @@ namespace VehicleEffects.GameExtensions
         {
             Randomizer randomizer = new Randomizer(id.RawData);
             var module = m_particleSystem.emission;
-            particlesPerSquare *= module.rate.constant;
-            int num = positions.Length;
+            particlesPerSquare *= module.rateOverTime.constant;
 
             if(randomizer.Int32(100u) <= probability)
             {
@@ -65,10 +64,10 @@ namespace VehicleEffects.GameExtensions
 
                     position += matrix.MultiplyVector(b);
                     emitParams.position = position;
-                    emitParams.startColor = m_colorOverride != null ? m_colorOverride.Value : m_particleSystem.startColor;
+                    emitParams.startColor = m_colorOverride != null ? m_colorOverride.Value : m_particleSystem.main.startColor.color;
                     emitParams.velocity = velocity + matrix.MultiplyVector(a) * startSpeed;
                     emitParams.startLifetime = this.m_minLifeTime + (this.m_maxLifeTime - this.m_minLifeTime) * UnityEngine.Random.value;
-                    emitParams.startSize = this.m_particleSystem.startSize;
+                    emitParams.startSize = this.m_particleSystem.main.startSize.constant;
                     this.m_particleSystem.Emit(emitParams, 1);
                 }
                 min = Vector3.Min(min, worldPoint - new Vector3(w, w, w));

@@ -77,6 +77,7 @@ namespace VehicleEffects.Effects
                 var particleRendererMov = templateMovementEffect.GetComponent<ParticleSystemRenderer>();
 
                 var psCopy = obj.GetComponent<ParticleSystem>() ?? obj.AddComponent<ParticleSystem>();
+                // TODO: Fix these deprecation warnings
                 psCopy.gravityModifier = 0.2f;
                 psCopy.startSize = 8;
 
@@ -108,7 +109,7 @@ namespace VehicleEffects.Effects
                 renderCopy.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes;
                 renderCopy.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 renderCopy.sharedMaterial = particleRenderer.sharedMaterial;
-                renderCopy.useLightProbes = false;
+                renderCopy.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
                 renderCopy.velocityScale = 0;
 
                 renderCopy.enabled = true;
