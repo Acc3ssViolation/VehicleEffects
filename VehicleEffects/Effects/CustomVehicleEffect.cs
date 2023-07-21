@@ -75,6 +75,11 @@ namespace VehicleEffects.Effects
             effectParameters.m_maxSpeed = Util.SpeedKmHToEffect(effectDef.MaxSpeed);
             effectParameters.m_minSpeed = Util.SpeedKmHToEffect(effectDef.MinSpeed);
 
+            if (effectParameters.m_direction.sqrMagnitude < Mathf.Epsilon)
+            {
+                Logging.LogError($"Direction vector is too small for wrapped effect '{baseEffect?.name}', make sure it is not set to zero!");
+            }
+
             createdEffects.TryGetValue(effectParameters, out effectWrapper);
 
             if(effectWrapper == null)

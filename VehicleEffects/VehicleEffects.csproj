@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="CustomParticlesManager.cs" />
     <Compile Include="CustomSoundsManager.cs" />
+    <Compile Include="GameExtensions\QuaternionExtensions.cs" />
     <Compile Include="ParticleEffectsDefinition.cs" />
     <Compile Include="SoundEffectsDefinition.cs" />
     <Compile Include="ParticleEffectsLoader.cs" />

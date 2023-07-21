@@ -48,7 +48,7 @@ namespace VehicleEffects.GameExtensions
             if(velocity.magnitude >= m_params.m_minSpeed && velocity.magnitude <= m_params.m_maxSpeed)
             {
                 // Add pos, dir and scale to matrix
-                area.m_matrix = area.m_matrix * Matrix4x4.TRS(m_params.m_position, Quaternion.LookRotation(m_params.m_direction), Vector3.one);
+                area.m_matrix = area.m_matrix * Matrix4x4.TRS(m_params.m_position, QuaternionExtensions.LookRotationWithoutComplaining(m_params.m_direction), Vector3.one);
                 m_wrappedEffect.RenderEffect(id, area, velocity, acceleration, magnitude, timeOffset, timeDelta, cameraInfo);
             }
         }
@@ -57,7 +57,7 @@ namespace VehicleEffects.GameExtensions
         {
             if(velocity.magnitude >= m_params.m_minSpeed && velocity.magnitude <= m_params.m_maxSpeed)
             {
-                area.m_matrix = area.m_matrix * Matrix4x4.TRS(m_params.m_position, Quaternion.LookRotation(m_params.m_direction), Vector3.one);
+                area.m_matrix = area.m_matrix * Matrix4x4.TRS(m_params.m_position, QuaternionExtensions.LookRotationWithoutComplaining(m_params.m_direction), Vector3.one);
                 m_wrappedEffect.PlayEffect(id, area, velocity, acceleration, magnitude, listenerInfo, audioGroup);
             }
         }

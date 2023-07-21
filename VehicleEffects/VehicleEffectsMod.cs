@@ -18,7 +18,7 @@ namespace VehicleEffects
     public partial class VehicleEffectsMod : LoadingExtensionBase, IUserMod
     {
         public const string name = "Vehicle Effects";
-        public const string version = "1.9.4";
+        public const string version = "1.9.5";
 
         private SavedBool showParseErrors;
         private SavedBool enableEditor;
